@@ -1,0 +1,57 @@
+trigger:
+  - master
+
+pool:
+  name: Azure Pipelines
+
+parameters:
+  - name: appName
+    default: ''
+  - name: feedName
+    default: ''
+  - name: sonarName
+    default: 'SonarQube'
+  - name: jdkVersion
+    default: '1.21'
+
+jobs:
+  - job: Build
+    steps:
+      - task: MavenAuthenticate@0
+        inputs:
+          artifactsFeeds: ${{ parameters.feedName }}
+          mavenServiceConnections: ${{ parameters.feedName }}
+        displayName: Maven Authenticate
+      - task: SonarQubePrepare@7
+        inputs:
+          SonarQube: ${{ parameters.sonarName }}
+          scannerMode: 'cli'
+          projectKey: ${{ parameters.name }}
+          displayName: Analysis Preparation
+      - task: Maven@4
+        inputs:
+          mavenPomFile: 'pom.xml'
+          goals: 'clean package'
+          publishJUnitResults: true
+          testResultsFiles: '**/surefire-reports/TEST-*.xml'
+          javaHomeOption: 'JDKVersion'
+          jdkVersionOption: ${{ parameters.jdkVersion }}
+          mavenVersionOption: 'Default'
+          mavenAuthenticateFeed: true
+          effectivePomSkip: false
+          sonarQubeRunAnalysis: true
+        displayName: Maven Build
+      - task: SonarQubePublish@7
+        inputs:
+          pollingTimeoutSec: '300'
+        displayName: Publish SonarQube Results
+      - task: CmdLine@2
+        inputs:
+          script: |
+            VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+            echo "##vso[task.setvariable variable=appVersion;isOutput=true]$VERSION"
+            echo "##vso[build.updatebuildnumber]$VERSION"
+            echo "Extracted version: $VERSION"
+        name: SetVersion
+        displayName: Set Version
+
