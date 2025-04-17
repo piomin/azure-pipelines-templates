@@ -22,7 +22,7 @@ jobs:
         inputs:
           SonarQube: ${{ parameters.sonarName }}
           scannerMode: 'cli'
-          projectKey: ${{ parameters.name }}
+          projectKey: ${{ parameters.appName }}
           displayName: Analysis Preparation
       - task: Maven@4
         inputs:
