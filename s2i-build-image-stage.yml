@@ -61,7 +61,7 @@ stages:
                 # Required env vars
                 export ROX_API_TOKEN=$(ACS_API_TOKEN)
                 export ROX_ENDPOINT=$(ACS_CENTRAL_ENDPOINT)
-                IMAGE=quay.io/pminkows/$(imageStream):$(appVersion)
+                IMAGE=quay.io/pminkows/${{ parameters.appName }}:$(appVersion)
                 
                 echo "Scanning image: $IMAGE"
                 roxctl image scan \
