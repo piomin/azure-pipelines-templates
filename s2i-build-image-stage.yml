@@ -1,0 +1,69 @@
+parameters:
+  - name: appName
+    default: ''
+
+stages:
+  - stage: BuildImage
+    dependsOn: Build
+    condition: succeeded()
+    variables:
+      imageTag: '$(appVersion)'
+      appVersion: $[ stageDependencies.Build.BuildAndTest.outputs['SetVersion.appVersion'] ]
+    jobs:
+      - job: BuildOnOpenShift
+        steps:
+          - task: CmdLine@2
+            inputs:
+              script: |
+                echo "Installing OpenShift CLI (oc)..."
+                curl -LO "https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz"
+                tar -xzf oc.tar.gz
+                sudo mv oc /usr/local/bin/
+                oc version
+            displayName: Install OpenShift CLI
+
+          - task: CmdLine@2
+            inputs:
+              script: |
+                oc login $(OCP_CLUSTER) -u opentlc-mgr -p $(OCP_PASSWORD) --insecure-skip-tls-verify=true
+                oc project demo-ci
+                ls $(Pipeline.Workspace)/${{ parameters.appName }}
+            displayName: Login to OpenShift
+
+          - task: CmdLine@2
+            inputs:
+              script: |
+                oc process s2i-build-tmpl -o yaml -p IMAGE_TAG=$(appVersion) | oc apply -f -
+            displayName: Create build
+
+          - task: CmdLine@2
+            displayName: Start S2I Build
+            inputs:
+              script: |
+                oc start-build ${{ parameters.appName }}-s2i \
+                  --follow  
+
+          - task: CmdLine@2
+            displayName: 'Install roxctl'
+            inputs:
+              script: |
+                echo "Downloading roxctl..."
+                curl -sSL https://mirror.openshift.com/pub/rhacs/assets/latest/bin/Linux/roxctl -o roxctl
+                chmod +x roxctl
+                sudo mv roxctl /usr/local/bin/
+                echo "roxctl version:"
+                roxctl version
+
+          - task: CmdLine@2
+            displayName: 'Scan image with roxctl'
+            inputs:
+              script: |
+                # Required env vars
+                export ROX_API_TOKEN=$(ACS_API_TOKEN)
+                export ROX_ENDPOINT=$(ACS_CENTRAL_ENDPOINT)
+                IMAGE=quay.io/pminkows/$(imageStream):$(appVersion)
+                
+                echo "Scanning image: $IMAGE"
+                roxctl image scan \
+                  --image "$IMAGE" \
+                  --insecure-skip-tls-verify \
