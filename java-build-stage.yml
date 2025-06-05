@@ -10,11 +10,8 @@ parameters:
 
 stages:
   - stage: Build
-    dependsOn: Build
     jobs:
       - job: Build
-        pool:
-          name: Azure Pipelines
         steps:
           - task: MavenAuthenticate@0
             inputs:

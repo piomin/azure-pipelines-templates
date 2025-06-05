@@ -9,6 +9,12 @@ resources:
       name: piomin/azure-pipelines-templates
       ref: refs/heads/master
 
+trigger:
+  - master
+
+pool:
+  name: Azure Pipelines
+  
 stages:
   - template: java-build-stage.yml@templates
     parameters:
