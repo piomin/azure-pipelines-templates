@@ -8,7 +8,7 @@ stages:
     condition: succeeded()
     variables:
       imageTag: '$(appVersion)'
-      appVersion: $[ stageDependencies.Build.BuildAndTest.outputs['SetVersion.appVersion'] ]
+      appVersion: $[ stageDependencies.Build.Build.outputs['SetVersion.appVersion'] ]
     jobs:
       - job: BuildOnOpenShift
         steps:
@@ -32,6 +32,7 @@ stages:
           - task: CmdLine@2
             inputs:
               script: |
+                echo "Extracted version: $(appVersion)"
                 oc process s2i-build-tmpl -o yaml \
                   -p IMAGE_TAG=$(appVersion) \
                   -p APP_NAME=${{ parameters.appName }} | oc apply -f -
