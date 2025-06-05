@@ -9,7 +9,7 @@ parameters:
     default: '1.21'
 
 stages:
-  - stage: BuildImage
+  - stage: Build
     dependsOn: Build
     jobs:
       - job: Build
