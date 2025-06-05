@@ -27,13 +27,14 @@ stages:
               script: |
                 oc login $(OCP_CLUSTER) -u opentlc-mgr -p $(OCP_PASSWORD) --insecure-skip-tls-verify=true
                 oc project demo-ci
-                ls $(Pipeline.Workspace)/${{ parameters.appName }}
             displayName: Login to OpenShift
 
           - task: CmdLine@2
             inputs:
               script: |
-                oc process s2i-build-tmpl -o yaml -p IMAGE_TAG=$(appVersion) | oc apply -f -
+                oc process s2i-build-tmpl -o yaml \
+                  -p IMAGE_TAG=$(appVersion) \
+                  -p APP_NAME=${{ parameters.appName }} | oc apply -f -
             displayName: Create build
 
           - task: CmdLine@2
