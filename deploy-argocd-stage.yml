@@ -13,8 +13,7 @@ stages:
     variables:
       appVersion: $[ stageDependencies.Build.Build.outputs['SetVersion.appVersion'] ]
     jobs:
-      - job: CommitNewTag
-        deployment: Deployment_Staging
+      - deployment: Deployment_Staging
         environment:
           name: ${{ parameters.env }}
         strategy:
