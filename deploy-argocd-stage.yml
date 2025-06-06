@@ -48,6 +48,6 @@ stages:
                 - task: CmdLine@2
                   inputs:
                     script: |
-                      argocd app ${{ parameters.appName }}-${{ parameters.env }}
+                      argocd app sync ${{ parameters.appName }}-${{ parameters.env }}
                       argocd app wait ${{ parameters.appName }}-${{ parameters.env }} --sync --health --timeout 600
                   displayName: Sync ArgoCD App
