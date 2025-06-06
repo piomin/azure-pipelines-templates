@@ -1,0 +1,54 @@
+parameters:
+  - name: appName
+    default: ''
+  - name: env
+    default: 'test'
+
+stages:
+  - stage: DeployOn${{ parameters.env }}
+    dependsOn:
+      - Build
+      - BuildImage
+    condition: succeeded()
+    variables:
+      appVersion: $[ stageDependencies.Build.Build.outputs['SetVersion.appVersion'] ]
+    jobs:
+      - job: CommitNewTag
+        deployment: Deployment_Staging
+        environment:
+          name: ${{ parameters.env }}
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: git://gitops
+                  persistCredentials: true
+                  fetchDepth: 0
+                - task: CmdLine@2
+                  inputs:
+                    script: |
+                      pwd
+                      ls -la
+                      git config --global user.email "piotr.minkowski@gmail.com"
+                      git config --global user.name "Piotr Minkowski"
+                      git checkout main
+                      yq e '.image.tag = "$(appVersion)"' -i apps/${{ parameters.appName }}/${{ parameters.env }}/values.yaml
+                      cat apps/${{ parameters.appName }}/${{ parameters.env }}/values.yaml
+                      git add apps/${{ parameters.appName }}/${{ parameters.env }}/values.yaml
+                      git commit -m "$(appVersion)"
+                      git remote -v
+                      git push https://$(System.AccessToken)@dev.azure.com/pminkows/pminkows/_git/gitops main
+                  displayName: Update image tag
+                  env:
+                    SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+                - task: ArgoCDInstaller@0
+                  inputs:
+                    connection: 'argocd-server'
+                    options: '--grpc-web --insecure'
+                  displayName: Install ArgoCD CLI
+                - task: CmdLine@2
+                  inputs:
+                    script: |
+                      argocd app ${{ parameters.appName }}-${{ parameters.env }}
+                      argocd app wait ${{ parameters.appName }}-${{ parameters.env }} --sync --health --timeout 600
+                  displayName: Sync ArgoCD App

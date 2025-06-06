@@ -23,4 +23,7 @@ stages:
   - template: s2i-build-image-stage.yml@templates
     parameters:
       appName: 'sample-spring-kotlin-microservice'
+  - template: deploy-argocd-stage.yml@templates
+    parameters:
+      appName: 'sample-spring-kotlin-microservice'
 ```
