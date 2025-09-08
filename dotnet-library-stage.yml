@@ -8,9 +8,6 @@ parameters:
   - name: dotnetVersion
     default: '9.x'
 
-variables:
-  buildConfiguration: 'Release'
-
 stages:
   - stage: Build
     displayName: 'Build, Test, and Publish'
@@ -35,14 +32,14 @@ stages:
             inputs:
               command: 'build'
               projects: ${{ parameters.projectPath }}
-              arguments: '-c ${{ parameters.buildConfiguration }} --no-restore'
+              arguments: '-c Release --no-restore'
 
           - task: DotNetCoreCLI@2
             displayName: 'Run tests'
             inputs:
               command: 'test'
               projects: ${{ parameters.testProjectPath }}
-              arguments: '-c $(buildConfiguration)'
+              arguments: '-c Release'
               publishTestResults: true
               testRunTitle: 'Unit Tests'
 
@@ -51,7 +48,7 @@ stages:
             inputs:
               command: 'pack'
               packagesToPack: ${{ parameters.projectPath }}
-              arguments: '-c $(buildConfiguration)'
+              arguments: '-c Release'
 
           - task: DotNetCoreCLI@2
             displayName: 'Publish package to Azure Artifacts'
