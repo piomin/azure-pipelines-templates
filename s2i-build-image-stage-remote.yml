@@ -19,10 +19,12 @@ stages:
           - task: SonarQubePrepare@7
             inputs:
               SonarQube: SonarQube
-              projectKey: ${{ parameters.appName }}
+              scannerMode: 'Other'
               displayName: Analysis Preparation
+              configMode: 'manual'
               extraProperties: |
                 sonar.organization=piomin
+                sonar.projectKey=${{ parameters.appName }}
           - task: SonarQubeAnalyze@7
           - task: SonarQubePublish@7
             inputs:
