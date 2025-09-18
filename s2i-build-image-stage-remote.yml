@@ -5,6 +5,8 @@ parameters:
     default: ''
   - name: builderImage
     default: ''
+  - name: rootPath
+    default: ''
 
 stages:
   - stage: Build_Image
