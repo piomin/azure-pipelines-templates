@@ -24,17 +24,6 @@ stages:
             inputs:
               version: ${{ parameters.dotnetVersion }}
 
-          - task: SonarQubePrepare@7
-            inputs:
-              SonarQube: SonarQube
-              scannerMode: 'Other'
-              displayName: Analysis Preparation
-              configMode: 'manual'
-              extraProperties: |
-                sonar.organization=piomin
-                sonar.projectKey=${{ parameters.sonarProjectKey }}
-                sonar.projectBaseDir=src/${{ parameters.libName }}
-
           - task: DotNetCoreCLI@2
             displayName: 'Restore packages'
             inputs:
@@ -42,6 +31,17 @@ stages:
               projects: ${{ parameters.projectPath }}
               feedsToUse: 'select'
               vstsFeed: ${{ parameters.feedName }}
+
+          - task: SonarQubePrepare@7
+            inputs:
+              SonarQube: SonarQube
+              scannerMode: 'dotnet'
+              projectKey: ${{ parameters.sonarProjectKey }}
+              displayName: Analysis Preparation
+              configMode: 'manual'
+              extraProperties: |
+                sonar.organization=piomin
+                sonar.projectBaseDir=$(Build.SourcesDirectory)/src/${{ parameters.libName }}
 
           - task: DotNetCoreCLI@2
             displayName: 'Build Library'
