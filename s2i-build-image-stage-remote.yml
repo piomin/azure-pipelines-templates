@@ -73,7 +73,7 @@ stages:
             displayName: Push Image
 
           - script: |
-              cosign sign --key $(CosignKey.secureFilePath) quay.io/pminkows/${{ parameters.appName }}:$(appVersion)
+              cosign sign --yes --key $(CosignKey.secureFilePath) quay.io/pminkows/${{ parameters.appName }}:$(appVersion)
             displayName: Sign Image
             env:
               COSIGN_PASSWORD: $(CosignKeyPassword)
