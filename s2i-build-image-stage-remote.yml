@@ -15,6 +15,18 @@ stages:
       - job: Build_And_Publish
         steps:
           - checkout: appRepo
+
+          - task: SonarQubePrepare@7
+            inputs:
+              SonarQube: SonarQube
+              scannerMode: 'cli'
+              projectKey: ${{ parameters.appName }}
+              displayName: Analysis Preparation
+          - task: SonarQubePublish@7
+            inputs:
+              pollingTimeoutSec: '300'
+            displayName: Publish SonarQube Results
+
           - task: DownloadSecureFile@1
             name: NuGetConfig
             inputs:
