@@ -35,12 +35,13 @@ stages:
           - task: SonarQubePrepare@7
             inputs:
               SonarQube: SonarQube
-              scannerMode: 'dotnet'
-              projectKey: ${{ parameters.sonarProjectKey }}
+              scannerMode: 'other'
               displayName: Analysis Preparation
               configMode: 'manual'
               extraProperties: |
+                sonar.verbose=true
                 sonar.organization=piomin
+                sonar.projectKey=${{ parameters.sonarProjectKey }}
                 sonar.projectBaseDir=$(Build.SourcesDirectory)/src/${{ parameters.libName }}
 
           - task: DotNetCoreCLI@2
