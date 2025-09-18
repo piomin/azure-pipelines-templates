@@ -19,7 +19,6 @@ stages:
           - task: SonarQubePrepare@7
             inputs:
               SonarQube: SonarQube
-              scannerMode: 'cli'
               projectKey: ${{ parameters.appName }}
               displayName: Analysis Preparation
           - task: SonarQubeAnalyze@7
