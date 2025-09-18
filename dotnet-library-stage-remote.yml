@@ -1,6 +1,8 @@
 parameters:
   - name: feedName
     default: ''
+  - name: libName
+    default: ''
   - name: projectPath
     default: ''
   - name: testProjectPath
@@ -43,6 +45,21 @@ stages:
               arguments: '-c Release'
               publishTestResults: true
               testRunTitle: 'Unit Tests'
+
+          - task: SonarQubePrepare@7
+            inputs:
+              SonarQube: SonarQube
+              scannerMode: 'Other'
+              displayName: Analysis Preparation
+              configMode: 'manual'
+              extraProperties: |
+                sonar.organization=piomin
+                sonar.projectKey=${{ parameters.libName }}
+          - task: SonarQubeAnalyze@7
+          - task: SonarQubePublish@7
+            inputs:
+              pollingTimeoutSec: '300'
+            displayName: Publish SonarQube Results
 
           - task: DotNetCoreCLI@2
             displayName: 'Pack package'
