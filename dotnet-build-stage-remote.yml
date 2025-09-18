@@ -86,15 +86,15 @@ stages:
             displayName: Publish SonarQube Results
             condition: always()
 
-        - ${{ if eq(parameters.publish, true) }}:
-          - task: DotNetCoreCLI@2
-            displayName: 'Pack package'
-            inputs:
-              command: 'pack'
-              packagesToPack: ${{ parameters.projectPath }}
-              arguments: '-c Release'
-          - task: DotNetCoreCLI@2
-            displayName: 'Publish package to Azure Artifacts'
-            inputs:
-              command: 'push'
-              publishVstsFeed: ${{ parameters.feedName }}
+          - ${{ if eq(parameters.publish, true) }}:
+            - task: DotNetCoreCLI@2
+              displayName: 'Pack package'
+              inputs:
+                command: 'pack'
+                packagesToPack: ${{ parameters.projectPath }}
+                arguments: '-c Release'
+            - task: DotNetCoreCLI@2
+              displayName: 'Publish package to Azure Artifacts'
+              inputs:
+                command: 'push'
+                publishVstsFeed: ${{ parameters.feedName }}
