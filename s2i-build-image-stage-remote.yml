@@ -1,0 +1,49 @@
+parameters:
+  - name: appName
+    default: ''
+  - name: projectPath
+    default: ''
+  - name: builderImage
+    default: ''
+
+stages:
+  - stage: Build_Image
+    displayName: 'Build Image'
+    jobs:
+      - job: Build_And_Publish
+        steps:
+          - checkout: appRepo
+          - task: DownloadSecureFile@1
+            name: NuGetConfig
+            inputs:
+              secureFile: 'NuGet.Config'
+          - task: CmdLine@2
+            inputs:
+              script: |
+                sudo apt-get update
+                sudo apt-get -y install podman
+            displayName: Install Podman
+          - task: CmdLine@2
+            inputs:
+              script: |
+                echo "Installing S2I CLI (s2i)..."
+                curl -LO "https://github.com/openshift/source-to-image/releases/download/v1.5.1/source-to-image-v1.5.1-c301811d-linux-amd64.tar.gz"
+                tar -xzf source-to-image-v1.5.1-c301811d-linux-amd64.tar.gz
+                sudo mv s2i /usr/local/bin/
+                s2i version
+            displayName: Install S2I CLI
+          - powershell: |
+              $version = dotnet msbuild ${{ parameters.projectPath }} -getproperty:Version
+              Write-Host "##vso[task.setvariable variable=appVersion]$version"
+              Write-Host "App version: $version"
+            displayName: Get Project Version
+          - script: |
+              echo "Version:$(appVersion)"
+              docker login registry.redhat.io -u $(RedHatUsername) -p $(RedHatPassword) 
+              s2i build . ${{ parameters.builderImage }} quay.io/pminkows/${{ parameters.appName }}:$(appVersion) --volume $(NuGetConfig.secureFilePath):/opt/app-root/src/nuget.config:Z --context-dir src/WebApi.App
+              docker images
+            displayName: Build App
+          - script: |
+              docker login quay.io -u pminkows -p $(RedHatPassword)
+              docker push quay.io/pminkows/${{ parameters.appName }}:$(appVersion)
+            displayName: Push Image
