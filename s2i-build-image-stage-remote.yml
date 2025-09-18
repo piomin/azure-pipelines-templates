@@ -40,7 +40,7 @@ stages:
           - script: |
               echo "Version:$(appVersion)"
               docker login registry.redhat.io -u $(RedHatUsername) -p $(RedHatPassword) 
-              s2i build . ${{ parameters.builderImage }} quay.io/pminkows/${{ parameters.appName }}:$(appVersion) --volume $(NuGetConfig.secureFilePath):/opt/app-root/src/nuget.config:Z --context-dir src/WebApi.App
+              s2i build . ${{ parameters.builderImage }} quay.io/pminkows/${{ parameters.appName }}:$(appVersion) --volume $(NuGetConfig.secureFilePath):/opt/app-root/src/nuget.config:Z --context-dir ${{ parameters.rootPath }}
               docker images
             displayName: Build App
           - script: |
