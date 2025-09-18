@@ -7,6 +7,8 @@ parameters:
     default: ''
   - name: testProjectPath
     default: ''
+  - name: sonarProjectKey
+    default: ''
   - name: dotnetVersion
     default: '9.x'
 
@@ -30,8 +32,8 @@ stages:
               configMode: 'manual'
               extraProperties: |
                 sonar.organization=piomin
-                sonar.projectKey=${{ parameters.libName }}
-                sonar.projectBaseDir=$(Build.SourcesDirectory)/src/${{ parameters.libName }}
+                sonar.projectKey=${{ parameters.sonarProjectKey }}
+                sonar.projectBaseDir=src/${{ parameters.libName }}
 
           - task: DotNetCoreCLI@2
             displayName: 'Restore packages'
