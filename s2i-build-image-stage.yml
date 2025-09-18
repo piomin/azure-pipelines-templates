@@ -68,4 +68,4 @@ stages:
                 echo "Scanning image: $IMAGE"
                 roxctl image scan \
                   --image "$IMAGE" \
-                  --insecure-skip-tls-verify \
+                  --insecure-skip-tls-verify

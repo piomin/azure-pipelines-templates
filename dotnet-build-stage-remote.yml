@@ -1,7 +1,7 @@
 parameters:
   - name: feedName
-    default: ''
-  - name: libName
+    default: 'pminkows'
+  - name: moduleName
     default: ''
   - name: projectPath
     default: ''
@@ -11,6 +11,8 @@ parameters:
     default: ''
   - name: dotnetVersion
     default: '9.x'
+  - name: publish
+    default: false
 
 stages:
   - stage: Build
@@ -32,17 +34,28 @@ stages:
               feedsToUse: 'select'
               vstsFeed: ${{ parameters.feedName }}
 
-          - task: SonarQubePrepare@7
+#          - task: SonarQubePrepare@7
+#            inputs:
+#              SonarQube: SonarQube
+#              scannerMode: 'other'
+#              displayName: Analysis Preparation
+#              configMode: 'manual'
+#              extraProperties: |
+#                sonar.organization=piomin
+#                sonar.projectKey=${{ parameters.sonarProjectKey }}
+#                sonar.projectBaseDir=$(Build.SourcesDirectory)/src/${{ parameters.moduleName }}
+
+          - task: SonarCloudPrepare@3
             inputs:
-              SonarQube: SonarQube
-              scannerMode: 'other'
+              SonarQube: SonarCloud
+              scannerMode: 'dotnet'
+              organization: 'piomin'
+              projectKey: ${{ parameters.sonarProjectKey }}
               displayName: Analysis Preparation
-              configMode: 'manual'
               extraProperties: |
                 sonar.verbose=true
-                sonar.organization=piomin
-                sonar.projectKey=${{ parameters.sonarProjectKey }}
-                sonar.projectBaseDir=$(Build.SourcesDirectory)/src/${{ parameters.libName }}
+                sonar.projectBaseDir=$(Build.SourcesDirectory)/src/${{ parameters.moduleName }}
+                sonar.qualitygate.wait=true
 
           - task: DotNetCoreCLI@2
             displayName: 'Build Library'
@@ -60,19 +73,26 @@ stages:
               publishTestResults: true
               testRunTitle: 'Unit Tests'
 
-          - task: SonarQubeAnalyze@7
-          - task: SonarQubePublish@7
+#          - task: SonarQubeAnalyze@7
+#          - task: SonarQubePublish@7
+#            inputs:
+#              pollingTimeoutSec: '300'
+#            displayName: Publish SonarQube Results
+
+          - task: SonarCloudAnalyze@3
+          - task: SonarCloudPublish@3
             inputs:
               pollingTimeoutSec: '300'
             displayName: Publish SonarQube Results
+            condition: always()
 
+        - ${{ if eq(parameters.publish, true) }}:
           - task: DotNetCoreCLI@2
             displayName: 'Pack package'
             inputs:
               command: 'pack'
               packagesToPack: ${{ parameters.projectPath }}
               arguments: '-c Release'
-
           - task: DotNetCoreCLI@2
             displayName: 'Publish package to Azure Artifacts'
             inputs:
