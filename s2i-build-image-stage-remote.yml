@@ -22,6 +22,7 @@ stages:
               scannerMode: 'cli'
               projectKey: ${{ parameters.appName }}
               displayName: Analysis Preparation
+          - task: SonarQubeAnalyze@7
           - task: SonarQubePublish@7
             inputs:
               pollingTimeoutSec: '300'
