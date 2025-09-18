@@ -45,6 +45,8 @@ stages:
 #                sonar.projectKey=${{ parameters.sonarProjectKey }}
 #                sonar.projectBaseDir=$(Build.SourcesDirectory)/src/${{ parameters.moduleName }}
 
+# to enable QG
+#                sonar.qualitygate.wait=true
           - task: SonarCloudPrepare@3
             inputs:
               SonarQube: SonarCloud
@@ -55,7 +57,6 @@ stages:
               extraProperties: |
                 sonar.verbose=true
                 sonar.projectBaseDir=$(Build.SourcesDirectory)/src/${{ parameters.moduleName }}
-                sonar.qualitygate.wait=true
 
           - task: DotNetCoreCLI@2
             displayName: 'Build Library'
