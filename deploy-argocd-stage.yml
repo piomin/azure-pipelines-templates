@@ -27,6 +27,7 @@ stages:
             deploy:
               steps:
                 - checkout: appRepo
+                  path: 'appRepo'
                 - checkout: git://gitops
                   persistCredentials: true
                   fetchDepth: 0
