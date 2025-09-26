@@ -59,6 +59,7 @@ stages:
                     waitForSync: true
                 - ${{ if eq(parameters.postDeploy, true) }}:
                   - script: |
+                      ls -la
                       chmod +x ./appRepo/scripts/postDeploy.sh
                       ./appRepo/scripts/postDeploy.sh ${{ parameters.env }}
                     displayName: "Run post-deploy script"
