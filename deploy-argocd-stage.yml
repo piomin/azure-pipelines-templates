@@ -3,6 +3,8 @@ parameters:
     default: ''
   - name: env
     default: 'test'
+  - name: postDeploy
+    default: false
 
 stages:
   - stage: DeployOn${{ parameters.env }}
@@ -52,7 +54,11 @@ stages:
                     syncPolicy: 'sync'
                     failOnTimeout: true
                     waitForSync: true
-
+                - ${{ if eq(parameters.postDeploy, true) }}:
+                  - script: |
+                      chmod +x ./scripts/postDeploy.sh
+                      ./scripts/postDeploy.sh ${{ parameters.env }}
+                    displayName: "Run post-deploy script"
 #                - task: ArgoCDInstaller@0
 #                  inputs:
 #                    connection: 'argocd-server'
