@@ -8,7 +8,7 @@ stages:
   - stage: DeployOn${{ parameters.env }}
     dependsOn:
       - Build
-      - BuildImage
+      - Build_Image
     condition: succeeded()
     variables:
       appVersion: $[ stageDependencies.Build_Image.Build_And_Publish.outputs['SetVersion.appVersion'] ]
