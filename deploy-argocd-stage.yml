@@ -45,6 +45,7 @@ stages:
                       git commit -m "$(appVersion)"
                       git remote -v
                       git push https://$(System.AccessToken)@dev.azure.com/pminkows/pminkows/_git/gitops main
+                      cd ..
                   displayName: Update image tag
                   env:
                     SYSTEM_ACCESSTOKEN: $(System.AccessToken)
