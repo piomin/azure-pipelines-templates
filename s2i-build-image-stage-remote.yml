@@ -53,7 +53,10 @@ stages:
                 sudo mv s2i /usr/local/bin/
                 s2i version
             displayName: Install S2I CLI
-
+          - script: |
+              sudo apt-get update
+              sudo apt-get install -y curl
+            displayName: "Install curl"
           - powershell: |
               $version = dotnet msbuild ${{ parameters.projectPath }} -getproperty:Version
               Write-Host "##vso[task.setvariable variable=appVersion]$version"
