@@ -61,8 +61,8 @@ stages:
                 - ${{ if eq(parameters.postDeploy, true) }}:
                   - script: |
                       ls -la
-                      chmod +x ./appRepo/scripts/postDeploy.sh
-                      ./appRepo/scripts/postDeploy.sh ${{ parameters.env }}
+                      chmod +x $(Build.SourcesDirectory)/appRepo/scripts/postDeploy.sh
+                      $(Build.SourcesDirectory)/appRepo/scripts/postDeploy.sh ${{ parameters.env }}
                     displayName: "Run post-deploy script"
 #                - task: ArgoCDInstaller@0
 #                  inputs:
