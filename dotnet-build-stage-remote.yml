@@ -34,11 +34,12 @@ stages:
               feedsToUse: 'select'
               vstsFeed: ${{ parameters.feedName }}
 
-          - task: Checkmarx AST@3
-            inputs:
-              CheckmarxService: 'Checkmarx'
-              projectName: '$(Build.Repository.Name)'
-              branchName: '$(Build.SourceBranchName)'
+#          - task: Checkmarx AST@3
+#            inputs:
+#              CheckmarxService: 'Checkmarx'
+#              projectName: '$(Build.Repository.Name)'
+#              branchName: '$(Build.SourceBranchName)'
+
 #          - task: SonarQubePrepare@7
 #            inputs:
 #              SonarQube: SonarQube
