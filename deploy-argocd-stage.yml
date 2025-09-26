@@ -9,6 +9,10 @@ stages:
     dependsOn:
       - Build
       - Build_Image
+      - ${{ if eq(parameters.env, 'uat') }}:
+        - DeployOntest
+      - ${{ if eq(parameters.env, 'prod') }}:
+        - DeployOnuat
     condition: succeeded()
     variables:
       appVersion: $[ stageDependencies.Build_Image.Build_And_Publish.outputs['SetVersion.imageTag'] ]
