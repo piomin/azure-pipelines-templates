@@ -56,7 +56,8 @@ stages:
 
           - powershell: |
               $version = dotnet msbuild ${{ parameters.projectPath }} -getproperty:Version
-              Write-Host "##vso[task.setvariable variable=appVersion;isOutput=true]$version"
+              Write-Host "##vso[task.setvariable variable=appVersion]$version"
+              Write-Host "##vso[task.setvariable variable=imageTag;isOutput=true]$version"
               Write-Host "App version: $version"
             displayName: Get Project Version
             name: SetVersion

@@ -11,7 +11,7 @@ stages:
       - Build_Image
     condition: succeeded()
     variables:
-      appVersion: $[ stageDependencies.Build_Image.Build_And_Publish.outputs['SetVersion.appVersion'] ]
+      appVersion: $[ stageDependencies.Build_Image.Build_And_Publish.outputs['SetVersion.imageTag'] ]
     jobs:
       - deployment: Deployment_Staging
         environment:
