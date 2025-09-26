@@ -26,12 +26,14 @@ stages:
           runOnce:
             deploy:
               steps:
+                - checkout: appRepo
                 - checkout: git://gitops
                   persistCredentials: true
                   fetchDepth: 0
                 - task: CmdLine@2
                   inputs:
                     script: |
+                      cd gitops
                       pwd
                       ls -la
                       git config --global user.email "piotr.minkowski@gmail.com"
@@ -55,7 +57,6 @@ stages:
                     failOnTimeout: true
                     waitForSync: true
                 - ${{ if eq(parameters.postDeploy, true) }}:
-                  - checkout: appRepo
                   - script: |
                       chmod +x ./appRepo/scripts/postDeploy.sh
                       ./appRepo/scripts/postDeploy.sh ${{ parameters.env }}
