@@ -30,6 +30,7 @@ stages:
             inputs:
               secureFile: 'NuGet.Config'
 
+          - task: NuGetAuthenticate@1
           - task: DotNetCoreCLI@2
             displayName: Restore all packages
             inputs:
