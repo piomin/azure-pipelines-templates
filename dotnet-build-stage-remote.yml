@@ -35,8 +35,8 @@ stages:
             displayName: Restore all packages
             inputs:
               command: 'restore'
-#              projects: ${{ parameters.projectPath }}
-              projects: '*.sln'
+              projects: ${{ parameters.projectPath }}
+#              projects: '*.sln'
               feedsToUse: 'config'
 #              vstsFeed: ${{ parameters.feedName }}
               nugetConfigFile: '$(UnAuthNuGetConfig.secureFilePath)'
