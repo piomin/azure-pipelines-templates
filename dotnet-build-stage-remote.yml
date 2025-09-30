@@ -26,9 +26,9 @@ stages:
             inputs:
               version: ${{ parameters.dotnetVersion }}
           - task: DownloadSecureFile@1
-            name: NuGetConfig
+            name: UnAuthNuGetConfig
             inputs:
-              secureFile: 'NuGet.Config'
+              secureFile: 'UnAuthNuget.Config'
 
           - task: NuGetAuthenticate@1
           - task: DotNetCoreCLI@2
@@ -39,7 +39,7 @@ stages:
               projects: '*.sln'
               feedsToUse: 'config'
 #              vstsFeed: ${{ parameters.feedName }}
-              nugetConfigFile: '$(NuGetConfig.secureFilePath)'
+              nugetConfigFile: '$(UnAuthNuGetConfig.secureFilePath)'
 
 #          - task: Checkmarx AST@3
 #            inputs:
