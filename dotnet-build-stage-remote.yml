@@ -25,14 +25,20 @@ stages:
             displayName: 'Init'
             inputs:
               version: ${{ parameters.dotnetVersion }}
+          - task: DownloadSecureFile@1
+            name: NuGetConfig
+            inputs:
+              secureFile: 'NuGet.Config'
 
           - task: DotNetCoreCLI@2
-            displayName: 'Restore packages'
+            displayName: Restore all packages
             inputs:
               command: 'restore'
-              projects: ${{ parameters.projectPath }}
-              feedsToUse: 'select'
-              vstsFeed: ${{ parameters.feedName }}
+#              projects: ${{ parameters.projectPath }}
+              projects: '*.sln'
+              feedsToUse: 'config'
+#              vstsFeed: ${{ parameters.feedName }}
+              nugetConfigFile: '$(NuGetConfig.secureFilePath)'
 
 #          - task: Checkmarx AST@3
 #            inputs:
@@ -76,7 +82,7 @@ stages:
             inputs:
               command: 'test'
               projects: ${{ parameters.testProjectPath }}
-              arguments: '-c Release'
+              arguments: '-c Release --no-restore'
               publishTestResults: true
               testRunTitle: 'Unit Tests'
 
