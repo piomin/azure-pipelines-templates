@@ -37,10 +37,10 @@ stages:
               command: 'restore'
               projects: ${{ parameters.projectPath }}
 #              projects: '*.sln'
-#              feedsToUse: 'select'
-              feedsToUse: 'config'
-#              vstsFeed: ${{ parameters.feedName }}
-              nugetConfigFile: '$(UnAuthNuGetConfig.secureFilePath)'
+              feedsToUse: 'select'
+#              feedsToUse: 'config'
+              vstsFeed: ${{ parameters.feedName }}
+#              nugetConfigFile: '$(UnAuthNuGetConfig.secureFilePath)'
 
 #          - task: Checkmarx AST@3
 #            inputs:
