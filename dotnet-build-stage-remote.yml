@@ -35,13 +35,13 @@ stages:
             displayName: Restore all packages
             inputs:
               command: 'restore'
-              arguments: '--source https://pkgs.dev.azure.com/pminkows/_packaging/pminkows/nuget/v3/index.json'
+#              arguments: '--source https://pkgs.dev.azure.com/pminkows/_packaging/pminkows/nuget/v3/index.json'
               projects: ${{ parameters.projectPath }}
 #              projects: '*.sln'
-#              feedsToUse: 'select'
-              feedsToUse: 'config'
-#              vstsFeed: ${{ parameters.feedName }}
-              nugetConfigFile: '$(UnAuthNuGetConfig.secureFilePath)'
+              feedsToUse: 'select'
+#              feedsToUse: 'config'
+              vstsFeed: ${{ parameters.feedName }}
+#              nugetConfigFile: '$(UnAuthNuGetConfig.secureFilePath)'
 
 #          - task: Checkmarx AST@3
 #            inputs:
