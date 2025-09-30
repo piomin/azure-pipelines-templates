@@ -25,21 +25,21 @@ stages:
             displayName: 'Init'
             inputs:
               version: ${{ parameters.dotnetVersion }}
-          - task: DownloadSecureFile@1
-            name: UnAuthNuGetConfig
-            inputs:
-              secureFile: 'UnAuthNuget.Config'
+#          - task: DownloadSecureFile@1
+#            name: UnAuthNuGetConfig
+#            inputs:
+#              secureFile: 'UnAuthNuget.Config'
 
-          - task: NuGetAuthenticate@1
+#          - task: NuGetAuthenticate@1
           - task: DotNetCoreCLI@2
             displayName: Restore all packages
             inputs:
               command: 'restore'
               projects: ${{ parameters.projectPath }}
 #              projects: '*.sln'
-              feedsToUse: 'config'
-#              vstsFeed: ${{ parameters.feedName }}
-              nugetConfigFile: '$(UnAuthNuGetConfig.secureFilePath)'
+              feedsToUse: 'select'
+              vstsFeed: ${{ parameters.feedName }}
+#              nugetConfigFile: '$(UnAuthNuGetConfig.secureFilePath)'
 
 #          - task: Checkmarx AST@3
 #            inputs:
