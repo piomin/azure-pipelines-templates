@@ -68,7 +68,11 @@ stages:
           - script: |
               echo "Version:$(appVersion)"
               docker login registry.redhat.io -u $(RedHatUsername) -p $(RedHatPassword) 
-              s2i build . ${{ parameters.builderImage }} quay.io/pminkows/${{ parameters.appName }}:$(appVersion) --volume $(NuGetConfig.secureFilePath):/opt/app-root/src/nuget.config:Z --context-dir ${{ parameters.rootPath }}
+              if [ -f "./Dockerfile" ]; then
+                docker build -t quay.io/pminkows/${{ parameters.appName }}:$(appVersion) .
+              else
+                s2i build . ${{ parameters.builderImage }} quay.io/pminkows/${{ parameters.appName }}:$(appVersion) --volume $(NuGetConfig.secureFilePath):/opt/app-root/src/nuget.config:Z --context-dir ${{ parameters.rootPath }}
+              fi
               docker images
             displayName: Build App
 
