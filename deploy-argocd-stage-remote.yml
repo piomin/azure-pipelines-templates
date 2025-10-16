@@ -55,6 +55,12 @@ stages:
                   env:
                     SYSTEM_ACCESSTOKEN: $(System.AccessToken)
 
+                - task: ArgoCDInstaller@0
+                  inputs:
+                    connection: 'argocd-server'
+                    options: '--grpc-web --insecure'
+                  displayName: Install ArgoCD CLI
+
                 - script: |
                     argocd app sync piomin-${{ parameters.appName }}-${{ parameters.env }}
                     argocd app wait piomin-${{ parameters.appName }}-${{ parameters.env }} --sync --health --timeout 600
