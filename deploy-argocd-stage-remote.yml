@@ -13,10 +13,8 @@ stages:
     dependsOn:
       - Build
       - Build_Image
-      - ${{ if eq(parameters.env, 'staging') }}:
-          - DeployOnstest
       - ${{ if eq(parameters.env, 'uat') }}:
-          - DeployOnstaging
+          - DeployOntest
       - ${{ if eq(parameters.env, 'prod') }}:
           - DeployOnuat
     condition: succeeded()
@@ -51,7 +49,7 @@ stages:
                       git add modules/${{ parameters.moduleName }}/${{ parameters.env }}/values.yaml
                       git commit -m "$(appVersion)"
                       git remote -v
-                      git push https://$(System.AccessToken)@wawsa131.aofrontex.local/Frontex/RedHat-openshift-dr/_git/${{ parameters.appName }}-config main
+                      git push https://$(System.AccessToken)@dev.azure.com/pminkows/pminkows/_git/${{ parameters.appName }}-config main
                       cd ..
                   displayName: Update image tag
                   env:
