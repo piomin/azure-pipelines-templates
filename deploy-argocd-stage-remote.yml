@@ -1,0 +1,73 @@
+parameters:
+  - name: appName
+    default: ''
+  - name: moduleName
+    default: ''
+  - name: env
+    default: 'test'
+  - name: postDeploy
+    default: false
+
+stages:
+  - stage: DeployOn${{ parameters.env }}
+    dependsOn:
+      - Build
+      - Build_Image
+      - ${{ if eq(parameters.env, 'staging') }}:
+          - DeployOnstest
+      - ${{ if eq(parameters.env, 'uat') }}:
+          - DeployOnstaging
+      - ${{ if eq(parameters.env, 'prod') }}:
+          - DeployOnuat
+    condition: succeeded()
+    variables:
+      appVersion: $[ stageDependencies.Build_Image.Build_And_Publish.outputs['SetVersion.imageTag'] ]
+    jobs:
+      - deployment: Deployment_Staging
+        environment:
+          name: ${{ parameters.env }}
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: appRepo
+                  path: 'appRepo'
+
+                - checkout: git://${{ parameters.appName }}-config
+                  persistCredentials: true
+                  fetchDepth: 0
+
+                - task: CmdLine@2
+                  inputs:
+                    script: |
+                      cd ${{ parameters.appName }}-config
+                      pwd
+                      ls -la
+                      git config --global user.email "pminkows@redhat.com"
+                      git config --global user.name "Piotr Minkowski"
+                      git checkout main
+                      yq e '.image.tag = "$(appVersion)"' -i modules/${{ parameters.moduleName }}/${{ parameters.env }}/values.yaml
+                      cat modules/${{ parameters.moduleName }}/${{ parameters.env }}/values.yaml
+                      git add modules/${{ parameters.moduleName }}/${{ parameters.env }}/values.yaml
+                      git commit -m "$(appVersion)"
+                      git remote -v
+                      git push https://$(System.AccessToken)@wawsa131.aofrontex.local/Frontex/RedHat-openshift-dr/_git/${{ parameters.appName }}-config main
+                      cd ..
+                  displayName: Update image tag
+                  env:
+                    SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+
+                - script: |
+                    argocd app sync ${{ parameters.appName }}-${{ parameters.env }}
+                    argocd app wait ${{ parameters.appName }}-${{ parameters.env }} --sync --health --timeout 600
+                  displayName: Sync App
+                  env:
+                    ARGOCD_SERVER: $(argocd-server-${{ parameters-env }})
+                    ARGOCD_AUTH_TOKEN: $(argocd-token-${{ parameters-env }})
+
+                - ${{ if eq(parameters.postDeploy, true) }}:
+                    - script: |
+                        ls -la
+                        chmod +x $(Agent.BuildDirectory)/appRepo/scripts/postDeploy.sh
+                        $(Agent.BuildDirectory)/appRepo/scripts/postDeploy.sh ${{ parameters.env }}
+                      displayName: "Run post-deploy script"
