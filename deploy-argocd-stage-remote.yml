@@ -60,8 +60,8 @@ stages:
                     argocd app wait piomin-${{ parameters.appName }}-${{ parameters.env }} --sync --health --timeout 600
                   displayName: Sync App
                   env:
-                    ARGOCD_SERVER: $(argocd-server-${{ parameters-env }})
-                    ARGOCD_AUTH_TOKEN: $(argocd-token-${{ parameters-env }})
+                    ARGOCD_SERVER: $(argocd-server-${{ parameters.env }})
+                    ARGOCD_AUTH_TOKEN: $(argocd-token-${{ parameters.env }})
 
                 - ${{ if eq(parameters.postDeploy, true) }}:
                     - script: |
