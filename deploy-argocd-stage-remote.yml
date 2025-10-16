@@ -56,8 +56,8 @@ stages:
                     SYSTEM_ACCESSTOKEN: $(System.AccessToken)
 
                 - script: |
-                    argocd app sync ${{ parameters.appName }}-${{ parameters.env }}
-                    argocd app wait ${{ parameters.appName }}-${{ parameters.env }} --sync --health --timeout 600
+                    argocd app sync piomin-${{ parameters.appName }}-${{ parameters.env }}
+                    argocd app wait piomin-${{ parameters.appName }}-${{ parameters.env }} --sync --health --timeout 600
                   displayName: Sync App
                   env:
                     ARGOCD_SERVER: $(argocd-server-${{ parameters-env }})
