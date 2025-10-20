@@ -39,17 +39,17 @@ stages:
                   inputs:
                     script: |
                       cd ${{ parameters.appName }}-config
-                      pwd
-                      ls -la
+                      
                       git config --global user.email "pminkows@redhat.com"
                       git config --global user.name "Piotr Minkowski"
-                      git checkout main
+                      git -c http.extraheader="AUTHORIZATION: bearer $(System.AccessToken)" push origin HEAD:main
+                      
                       yq e '.image.tag = "$(appVersion)"' -i modules/${{ parameters.moduleName }}/${{ parameters.env }}/values.yaml
                       cat modules/${{ parameters.moduleName }}/${{ parameters.env }}/values.yaml
                       git add modules/${{ parameters.moduleName }}/${{ parameters.env }}/values.yaml
                       git commit -m "$(appVersion)"
-                      git remote -v
-                      git push https://$(System.AccessToken)@dev.azure.com/pminkows/pminkows/_git/${{ parameters.appName }}-config main
+                      
+                      git push origin HEAD:main
                       cd ..
                   displayName: Update image tag
                   env:
