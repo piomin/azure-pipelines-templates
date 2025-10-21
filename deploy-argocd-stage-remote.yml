@@ -33,7 +33,8 @@ stages:
 
                 - checkout: git://${{ parameters.appName }}-config
                   persistCredentials: true
-                  fetchDepth: 0
+                  clean: true
+                  ref: refs/heads/main
 
                 - task: CmdLine@2
                   inputs:
@@ -43,7 +44,6 @@ stages:
                       git config --global user.email "pminkows@redhat.com"
                       git config --global user.name "Piotr Minkowski"
                       git -c http.extraheader="AUTHORIZATION: bearer $(System.AccessToken)" push origin HEAD:main
-                      git pull
                       
                       yq e '.image.tag = "$(appVersion)"' -i modules/${{ parameters.moduleName }}/${{ parameters.env }}/values.yaml
                       cat modules/${{ parameters.moduleName }}/${{ parameters.env }}/values.yaml
