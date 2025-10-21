@@ -33,22 +33,21 @@ stages:
 
                 - checkout: git://${{ parameters.appName }}-config
                   persistCredentials: true
-                  clean: true
-                  ref: refs/heads/main
 
                 - task: CmdLine@2
                   inputs:
                     script: |
                       cd ${{ parameters.appName }}-config
                       
-                      git config --global user.email "pminkows@redhat.com"
-                      git config --global user.name "Piotr Minkowski"
+                      git config --global user.email "$(Build.RequestedForEmail)"
+                      git config --global user.name "$(Build.RequestedFor)"
                       git -c http.extraheader="AUTHORIZATION: bearer $(System.AccessToken)" push origin HEAD:main
+                      git checkout main
                       
                       yq e '.image.tag = "$(appVersion)"' -i modules/${{ parameters.moduleName }}/${{ parameters.env }}/values.yaml
                       cat modules/${{ parameters.moduleName }}/${{ parameters.env }}/values.yaml
                       git add modules/${{ parameters.moduleName }}/${{ parameters.env }}/values.yaml
-                      git commit -m "$(appVersion)"
+                      git commit -m "${{ parameters.moduleName }}-${{ parameters.env }} $(appVersion)"
                       
                       git push origin HEAD:main
                       cd ..
