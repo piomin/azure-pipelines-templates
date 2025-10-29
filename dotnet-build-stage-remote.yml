@@ -13,6 +13,8 @@ parameters:
     default: '9.x'
   - name: publish
     default: false
+  - name: skipTests
+    default: false
 
 stages:
   - stage: Build
@@ -80,14 +82,15 @@ stages:
               projects: ${{ parameters.projectPath }}
               arguments: '-c Release --no-restore'
 
-          - task: DotNetCoreCLI@2
-            displayName: 'Run tests'
-            inputs:
-              command: 'test'
-              projects: ${{ parameters.testProjectPath }}
-              arguments: '-c Release --no-restore'
-              publishTestResults: true
-              testRunTitle: 'Unit Tests'
+          - ${{ if eq(parameters.skipTests, false) }}:
+            - task: DotNetCoreCLI@2
+              displayName: 'Run tests'
+              inputs:
+                command: 'test'
+                projects: ${{ parameters.testProjectPath }}
+                arguments: '-c Release --no-restore'
+                publishTestResults: true
+                testRunTitle: 'Unit Tests'
 
 #          - task: SonarQubeAnalyze@7
 #          - task: SonarQubePublish@7
