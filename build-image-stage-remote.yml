@@ -11,6 +11,8 @@ parameters:
 stages:
   - stage: Build_Image
     displayName: 'Build Image'
+    variables:
+      appVersion: $[ stageDependencies.Build.Build_And_Publish.outputs['SetVersion.imageTag'] ]
     jobs:
       - job: Build_And_Publish
         steps:
@@ -57,13 +59,13 @@ stages:
               sudo apt-get update
               sudo apt-get install -y curl
             displayName: "Install curl"
-          - powershell: |
-              $version = dotnet msbuild ${{ parameters.projectPath }} -getproperty:Version
-              Write-Host "##vso[task.setvariable variable=appVersion]$version"
-              Write-Host "##vso[task.setvariable variable=imageTag;isOutput=true]$version"
-              Write-Host "App version: $version"
-            displayName: Get Project Version
-            name: SetVersion
+#          - powershell: |
+#              $version = dotnet msbuild ${{ parameters.projectPath }} -getproperty:Version
+#              Write-Host "##vso[task.setvariable variable=appVersion]$version"
+#              Write-Host "##vso[task.setvariable variable=imageTag;isOutput=true]$version"
+#              Write-Host "App version: $version"
+#            displayName: Get Project Version
+#            name: SetVersion
 
           - script: |
               echo "Version:$(appVersion)"
