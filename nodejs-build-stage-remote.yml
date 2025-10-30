@@ -81,7 +81,7 @@ stages:
               scannerMode: 'cli'
               configMode: 'manual'
               organization: 'piomin'
-              projectKey: ${{ parameters.sonarProjectKey }}
+              cliProjectKey: ${{ parameters.sonarProjectKey }}
               displayName: Analysis Preparation
               extraProperties: |
                 sonar.verbose=true
