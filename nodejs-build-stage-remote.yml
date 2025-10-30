@@ -37,7 +37,7 @@ stages:
 
           - task: npmAuthenticate@0
             inputs:
-              workingFile: ''
+              workingFile: '$(npmrc.secureFilePath)'
             displayName: Authenticate Feed
 
           # Install dependencies (production-only by default)
