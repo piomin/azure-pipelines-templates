@@ -55,10 +55,10 @@ stages:
             displayName: Install dependencies
 
           # Run build (if you have a build step)
-          - script: |
-              echo "Building the app..."
-              npm run build
-            displayName: 'Build'
+#          - script: |
+#              echo "Building the app..."
+#              npm run build
+#            displayName: 'Build'
 
           # Run tests
           - ${{ if eq(parameters.skipTests, false) }}:
