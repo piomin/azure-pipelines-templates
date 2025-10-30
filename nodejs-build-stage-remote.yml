@@ -35,6 +35,10 @@ stages:
               versionSpec: ${{ parameters.nodejsVersion }}
             displayName: Use Node.js ${{ parameters.nodejsVersion }}
 
+          - script: |
+              cat $(npmrc.secureFilePath)
+            displayName: Test
+
           - task: npmAuthenticate@0
             inputs:
               workingFile: '$(npmrc.secureFilePath)'
