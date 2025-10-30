@@ -44,8 +44,6 @@ stages:
             displayName: Test
 
           - task: npmAuthenticate@0
-            inputs:
-              workingFile: '$(Pipeline.Workspace)/.npmrc.temp'
             displayName: Authenticate Feed
 
           # Install dependencies (production-only by default)
