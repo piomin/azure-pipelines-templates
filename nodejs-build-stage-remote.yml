@@ -1,0 +1,85 @@
+parameters:
+  - name: feedName
+    default: 'pminkows'
+  - name: moduleName
+    default: ''
+  - name: projectPath
+    default: ''
+  - name: testProjectPath
+    default: ''
+  - name: sonarProjectKey
+    default: ''
+  - name: nodejsVersion
+    default: '18.x'
+  - name: publish
+    default: false
+  - name: skipTests
+    default: false
+
+stages:
+  - stage: Build
+    displayName: 'Build/Publish'
+    jobs:
+      - job: Build_And_Publish
+        steps:
+
+          - checkout: appRepo
+
+          - task: NodeTool@0
+            inputs:
+              versionSpec: ${{ parameters.nodejsVersion }}
+            displayName: Use Node.js ${{ parameters.nodejsVersion }}
+
+          - task: npmAuthenticate@0
+            inputs:
+              workingFile: .npmrc
+            displayName: Authenticate Feed
+
+          # Install dependencies (production-only by default)
+          - script: |
+              npm ci --omit=dev
+            displayName: Install dependencies
+
+          # Run build (if you have a build step)
+          - script: |
+              echo "Building the app..."
+              npm run build
+            displayName: 'Build'
+
+          # Run tests
+          - ${{ if eq(parameters.skipTests, false) }}:
+            - script: |
+                echo "Running tests..."
+                npm test
+              displayName: 'Test'
+
+          - task: SonarCloudPrepare@3
+            inputs:
+              SonarQube: SonarCloud
+              scannerMode: 'dotnet'
+              organization: 'piomin'
+              projectKey: ${{ parameters.sonarProjectKey }}
+              displayName: Analysis Preparation
+              extraProperties: |
+                sonar.verbose=true
+#                sonar.projectBaseDir=$(Build.SourcesDirectory)/src/${{ parameters.moduleName }}
+
+          - task: SonarCloudAnalyze@3
+          - task: SonarCloudPublish@3
+            inputs:
+              pollingTimeoutSec: '300'
+            displayName: Publish SonarQube Results
+            condition: always()
+
+          - ${{ if eq(parameters.publish, true) }}:
+            - task: DotNetCoreCLI@2
+              displayName: 'Pack package'
+              inputs:
+                command: 'pack'
+                packagesToPack: ${{ parameters.projectPath }}
+                arguments: '-c Release'
+            - task: DotNetCoreCLI@2
+              displayName: 'Publish package to Azure Artifacts'
+              inputs:
+                command: 'push'
+                publishVstsFeed: ${{ parameters.feedName }}
