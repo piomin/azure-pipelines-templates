@@ -36,7 +36,7 @@ stages:
             displayName: Use Node.js ${{ parameters.nodejsVersion }}
 
           - script: |
-              echo "registry=https://registry.npmjs.org/" > $(Pipeline.Workspace)/.npmrc.temp
+              touch $(Pipeline.Workspace)/.npmrc.temp
             displayName: 'Generate temporary .npmrc'
 
           - script: |
