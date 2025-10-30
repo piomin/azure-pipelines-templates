@@ -36,8 +36,7 @@ stages:
             displayName: Use Node.js ${{ parameters.nodejsVersion }}
 
           - script: |
-              echo "registry=https://pkgs.dev.azure.com/pminkows/_packaging/pminkows/npm/registry/" > $(Pipeline.Workspace)/.npmrc.temp
-              echo "always-auth=true" >> $(Pipeline.Workspace)/.npmrc.temp
+              echo "registry=https://registry.npmjs.org/" > $(Pipeline.Workspace)/.npmrc.temp
             displayName: 'Generate temporary .npmrc'
 
           - script: |
