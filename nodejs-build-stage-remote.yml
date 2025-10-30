@@ -36,12 +36,17 @@ stages:
             displayName: Use Node.js ${{ parameters.nodejsVersion }}
 
           - script: |
+              echo "registry=https://pkgs.dev.azure.com/pminkows/_packaging/pminkows/npm/registry/" > $(Pipeline.Workspace)/.npmrc.temp
+              echo "always-auth=true" >> $(Pipeline.Workspace)/.npmrc.temp
+            displayName: 'Generate temporary .npmrc'
+
+          - script: |
               cat $(npmrc.secureFilePath)
             displayName: Test
 
           - task: npmAuthenticate@0
             inputs:
-              workingFile: '.npmrc.auth'
+              workingFile: '$(Pipeline.Workspace)/.npmrc.temp'
             displayName: Authenticate Feed
 
           # Install dependencies (production-only by default)
