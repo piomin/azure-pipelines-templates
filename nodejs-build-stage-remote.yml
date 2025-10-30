@@ -25,6 +25,11 @@ stages:
 
           - checkout: appRepo
 
+          - task: DownloadSecureFile@1
+            name: npmrc
+            inputs:
+              secureFile: 'npmrc'
+
           - task: NodeTool@0
             inputs:
               versionSpec: ${{ parameters.nodejsVersion }}
@@ -32,7 +37,7 @@ stages:
 
           - task: npmAuthenticate@0
             inputs:
-              workingFile: .npmrc
+              workingFile: $(npmrc.secureFilePath)
             displayName: Authenticate Feed
 
           # Install dependencies (production-only by default)
