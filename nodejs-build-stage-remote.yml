@@ -41,9 +41,12 @@ stages:
 
           - script: |
               cat $(npmrc.secureFilePath)
+              cat $(Pipeline.Workspace)/.npmrc.temp
             displayName: Test
 
           - task: npmAuthenticate@0
+            inputs:
+              workingFile: .npmrc
             displayName: Authenticate Feed
 
           # Install dependencies (production-only by default)
