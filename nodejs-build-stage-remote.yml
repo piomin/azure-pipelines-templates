@@ -78,7 +78,8 @@ stages:
           - task: SonarCloudPrepare@3
             inputs:
               SonarQube: SonarCloud
-              scannerMode: 'dotnet'
+              scannerMode: 'cli'
+              configMode: 'manual'
               organization: 'piomin'
               projectKey: ${{ parameters.sonarProjectKey }}
               displayName: Analysis Preparation
