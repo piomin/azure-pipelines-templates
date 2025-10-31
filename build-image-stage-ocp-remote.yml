@@ -73,6 +73,7 @@ stages:
             timeoutInMinutes: 5
 
           - script: |
+              docker login quay.io -u $(RedHatUsername) -p $(RedHatPassword)
               cosign sign --yes --key $(CosignKey.secureFilePath) quay.io/pminkows/${{ parameters.appName }}:$(appVersion)
             displayName: Sign Image
             env:
