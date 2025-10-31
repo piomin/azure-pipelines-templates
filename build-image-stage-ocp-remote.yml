@@ -1,0 +1,91 @@
+parameters:
+  - name: appName
+    default: ''
+  - name: projectPath
+    default: ''
+  - name: builderImage
+    default: registry.redhat.io/rhel8/dotnet-90:latest
+  - name: rootPath
+    default: ''
+
+stages:
+  - stage: Build_Image
+    displayName: 'Build Image'
+    variables:
+      appVersion: $[ stageDependencies.Build.Build_And_Publish.outputs['SetVersion.imageTag'] ]
+    jobs:
+      - job: Build_And_Publish
+        steps:
+
+          - checkout: appRepo
+
+          - task: DownloadSecureFile@1
+            name: CosignKey
+            inputs:
+              secureFile: 'cosign.key'
+
+          - script: |
+              echo "Installing oc client..."
+              curl -LO https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux.tar.gz
+              tar -xvf openshift-client-linux.tar.gz
+              sudo mv oc kubectl /usr/local/bin/
+              oc version --client
+            displayName: Install oc
+
+          - script: |
+              COSIGN_VERSION=v2.4.0
+              curl -sSL -o cosign https://github.com/sigstore/cosign/releases/download/${COSIGN_VERSION}/cosign-linux-amd64
+              chmod +x cosign
+              sudo mv cosign /usr/local/bin/cosign
+              cosign version
+            displayName: Install Cosign
+
+          - script: |
+              echo "Downloading roxctl..."
+              curl -sSL https://mirror.openshift.com/pub/rhacs/assets/latest/bin/Linux/roxctl -o roxctl
+              chmod +x roxctl
+              sudo mv roxctl /usr/local/bin/
+              echo "roxctl version:"
+              roxctl version
+            displayName: Install Roxctl
+
+          - script: |
+              sudo apt-get update
+              sudo apt-get install -y curl
+            displayName: "Install curl"
+
+          - script: |
+              oc login $(OCP_CLUSTER) -u $(OCP_USERNAME) -p $(OCP_PASSWORD) --insecure-skip-tls-verify=true
+              oc project $(OCP_CI_PROJECT)
+              echo "Version:$(appVersion)"
+              if [ -f "${{ parameters.rootPath }}/Dockerfile" ]; then
+                oc process build-config-template-dockerfile -p APP_NAME=${{ parameters.appName }} -p CONTEXT_DIR=${{ parameters.rootPath }} -p IMAGE_TAG=$(appVersion) | oc apply -f -
+              else
+                oc process build-config-template -p APP_NAME=${{ parameters.appName }} -p CONTEXT_DIR=${{ parameters.rootPath }} -p IMAGE_TAG=$(appVersion) | oc apply -f -
+              fi
+            displayName: Build App
+
+          - task: CmdLine@2
+            inputs:
+              script: 'oc start-build ${{ parameters.appName }} -w'
+              failOnStderr: true
+            displayName: Run build
+            timeoutInMinutes: 5
+
+          - script: |
+              cosign sign --yes --key $(CosignKey.secureFilePath) quay.io/pminkows/${{ parameters.appName }}:$(appVersion)
+            displayName: Sign Image
+            env:
+              COSIGN_PASSWORD: $(CosignKeyPassword)
+
+          - script: |
+              # Required env vars
+              export ROX_API_TOKEN=$(AcsApiToken)
+              export ROX_ENDPOINT=$(AcsCentralEndpoint)
+              IMAGE=quay.io/pminkows/${{ parameters.appName }}:$(appVersion)
+              
+              echo "Scanning image: $IMAGE"
+              roxctl image scan \
+                --image "$IMAGE" \
+                --insecure-skip-tls-verify
+            displayName: Scan Image
