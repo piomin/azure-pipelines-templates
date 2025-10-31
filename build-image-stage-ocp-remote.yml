@@ -61,7 +61,7 @@ stages:
               if [ -f "${{ parameters.rootPath }}/Dockerfile" ]; then
                 oc process build-config-template-dockerfile -p APP_NAME=${{ parameters.appName }} -p CONTEXT_DIR=${{ parameters.rootPath }} -p IMAGE_TAG=$(appVersion) | oc apply -f -
               else
-                oc process build-config-template -p APP_NAME=${{ parameters.appName }} -p CONTEXT_DIR=${{ parameters.rootPath }} -p IMAGE_TAG=$(appVersion) | oc apply -f -
+                oc process build-config-template-github -p APP_NAME=${{ parameters.appName }} -p CONTEXT_DIR=${{ parameters.rootPath }} -p IMAGE_TAG=$(appVersion) | oc apply -f -
               fi
             displayName: Build App
 
