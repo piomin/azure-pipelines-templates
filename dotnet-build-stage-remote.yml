@@ -105,6 +105,14 @@ stages:
             displayName: Publish SonarQube Results
             condition: always()
 
+          - script: |
+              version=$(dotnet msbuild ${{ parameters.projectPath }} -getproperty:Version)
+              echo "##vso[task.setvariable variable=appVersion]$version"
+              echo "##vso[task.setvariable variable=imageTag;isOutput=true]$version"
+              echo "App version: $version"
+            displayName: Get App Version
+            name: SetVersion
+
           - ${{ if eq(parameters.publish, true) }}:
             - task: DotNetCoreCLI@2
               displayName: 'Pack package'

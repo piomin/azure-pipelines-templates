@@ -67,7 +67,7 @@ stages:
 
           - task: CmdLine@2
             inputs:
-              script: 'oc start-build ${{ parameters.appName }} -w'
+              script: 'oc start-build ${{ parameters.appName }} --follow'
               failOnStderr: true
             displayName: Run build
             timeoutInMinutes: 5
