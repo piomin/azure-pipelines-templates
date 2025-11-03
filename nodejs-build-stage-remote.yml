@@ -90,7 +90,7 @@ stages:
               - script: |
                   git config user.email "buildagent@yourcompany.com"
                   git config user.name "Azure Pipelines"
-                  version=$(GitVersion.MajorMinorPatch)
+                  version=$(SetVersion.MajorMinorPatch)
                   echo "##vso[task.setvariable variable=appVersion]$version"
                   echo "##vso[task.setvariable variable=imageTag;isOutput=true]$version"
                   echo "App version: $version"
