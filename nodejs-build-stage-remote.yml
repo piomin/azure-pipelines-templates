@@ -26,6 +26,7 @@ stages:
         steps:
 
           - checkout: appRepo
+            storeCredentials: true
 
           - task: DownloadSecureFile@1
             name: npmrc

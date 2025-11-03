@@ -24,7 +24,10 @@ stages:
     jobs:
       - job: Build_And_Publish
         steps:
+
           - checkout: appRepo
+            storeCredentials: true
+
           - task: UseDotNet@2
             displayName: 'Init'
             inputs:
