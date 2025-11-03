@@ -58,8 +58,14 @@ stages:
               mavenVersionOption: 'Default'
               mavenAuthenticateFeed: true
               effectivePomSkip: false
-              sonarQubeRunAnalysis: ${{ !parameters.skipChecks }}
+              sonarQubeRunAnalysis: ${{ not(parameters.skipChecks) }}
             displayName: Maven Build
+
+          - task: Maven@4
+            inputs:
+              mavenPomFile: 'pom.xml'
+              goals: 'dependency:tree'
+            displayName: Dependencies
 
           - ${{ if eq(parameters.skipChecks, false) }}:
             - task: SonarQubePublish@7
@@ -69,7 +75,7 @@ stages:
 
           - ${{ if eq(parameters.versionMode, 'file') }}:
              - script: |
-                 version=$(npm pkg get version | tr -d '"')
+                 version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
                  echo "##vso[task.setvariable variable=appVersion]$version"
                  echo "##vso[task.setvariable variable=imageTag;isOutput=true]$version"
                  echo "App version: $version"
