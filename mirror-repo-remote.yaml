@@ -5,10 +5,10 @@ parameters:
     default: ''
 
 stages:
-  - stage: ${{ parameters.appName }}-sync
+  - stage: ${{ parameters.appName }}_Sync
     displayName: 'Sync repos ${{ parameters.appName }}'
     jobs:
-      - job: Test
+      - job: Sync
         steps:
           - checkout: git://${{ parameters.appName }}-config
             persistCredentials: true
