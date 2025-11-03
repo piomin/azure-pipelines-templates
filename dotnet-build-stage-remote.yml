@@ -124,9 +124,10 @@ stages:
             - task: gitversion-setup@4
               inputs:
                 versionSpec: '6.4.x'
+              displayName: Init git-version
             - task: gitversion-execute@4
               displayName: Get App Version
-              name: SetVersion
+              name: GetVersion
             - script: |
                 git config user.email "buildagent@yourcompany.com"
                 git config user.name "Azure Pipelines"
@@ -137,6 +138,7 @@ stages:
                 git tag $version
                 git push origin $version
               displayName: Create Git Tag
+              name: SetVersion
 
           - ${{ if eq(parameters.publish, true) }}:
             - task: DotNetCoreCLI@2
