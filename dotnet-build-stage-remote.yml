@@ -121,6 +121,9 @@ stages:
               name: SetVersion
 
           - ${{ if eq(parameters.versionMode, 'tag') }}:
+            - task: gitversion-setup@4
+              inputs:
+                versionSpec: '6.4.x'
             - task: gitversion-execute@4
               displayName: Get App Version
               name: SetVersion
