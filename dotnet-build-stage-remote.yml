@@ -17,6 +17,8 @@ parameters:
     default: false
   - name: versionMode
     default: 'file'
+  - name: skipChecks
+    default: false
 
 stages:
   - stage: Build
@@ -33,6 +35,11 @@ stages:
             displayName: 'Init'
             inputs:
               version: ${{ parameters.dotnetVersion }}
+
+          - script: |
+              dotnet list package --include-transitive
+            displayName: 'Dependencies list'
+
           - task: DownloadSecureFile@1
             name: UnAuthNuGetConfig
             inputs:
@@ -70,16 +77,18 @@ stages:
 
 # to enable QG
 #                sonar.qualitygate.wait=true
-          - task: SonarCloudPrepare@3
-            inputs:
-              SonarQube: SonarCloud
-              scannerMode: 'dotnet'
-              organization: 'piomin'
-              projectKey: ${{ parameters.sonarProjectKey }}
-              displayName: Analysis Preparation
-              extraProperties: |
-                sonar.verbose=true
-                sonar.projectBaseDir=$(Build.SourcesDirectory)/src/${{ parameters.moduleName }}
+
+          - ${{ if eq(parameters.skipChecks, false) }}:
+            - task: SonarCloudPrepare@3
+              inputs:
+                SonarQube: SonarCloud
+                scannerMode: 'dotnet'
+                organization: 'piomin'
+                projectKey: ${{ parameters.sonarProjectKey }}
+                displayName: Analysis Preparation
+                extraProperties: |
+                  sonar.verbose=true
+                  sonar.projectBaseDir=$(Build.SourcesDirectory)/src/${{ parameters.moduleName }}
 
           - task: DotNetCoreCLI@2
             displayName: 'Build Library'
@@ -104,12 +113,13 @@ stages:
 #              pollingTimeoutSec: '300'
 #            displayName: Publish SonarQube Results
 
-          - task: SonarCloudAnalyze@3
-          - task: SonarCloudPublish@3
-            inputs:
-              pollingTimeoutSec: '300'
-            displayName: Publish SonarQube Results
-            condition: always()
+          - ${{ if eq(parameters.skipChecks, false) }}:
+            - task: SonarCloudAnalyze@3
+            - task: SonarCloudPublish@3
+              inputs:
+                pollingTimeoutSec: '300'
+              displayName: Publish SonarQube Results
+              condition: always()
 
           - ${{ if eq(parameters.versionMode, 'file') }}:
             - script: |
