@@ -15,6 +15,8 @@ parameters:
     default: false
   - name: skipTests
     default: false
+  - name: versionMode
+    default: file
 
 stages:
   - stage: Build
@@ -67,13 +69,29 @@ stages:
                 npm test
               displayName: 'Test'
 
-          - script: |
-              version=$(npm pkg get version | tr -d '"')
-              echo "##vso[task.setvariable variable=appVersion]$version"
-              echo "##vso[task.setvariable variable=imageTag;isOutput=true]$version"
-              echo "App version: $version"
-            displayName: Get App Version
-            name: SetVersion
+          - ${{ if eq(parameters.versionMode, "file") }}:
+            - script: |
+                version=$(npm pkg get version | tr -d '"')
+                echo "##vso[task.setvariable variable=appVersion]$version"
+                echo "##vso[task.setvariable variable=imageTag;isOutput=true]$version"
+                echo "App version: $version"
+              displayName: Get App Version
+              name: SetVersion
+
+          - ${{ if eq(parameters.versionMode, "tag") }}:
+              - task: gitversion-execute@4
+                displayName: Get App Version
+                name: SetVersion
+              - script: |
+                  git config user.email "buildagent@yourcompany.com"
+                  git config user.name "Azure Pipelines"
+                  version=$(GitVersion.MajorMinorPatch)
+                  echo "##vso[task.setvariable variable=appVersion]$version"
+                  echo "##vso[task.setvariable variable=imageTag;isOutput=true]$version"
+                  echo "App version: $version"
+                  git tag $version
+                  git push origin $version
+                displayName: Create Git Tag
 
           - task: SonarCloudPrepare@3
             inputs:
