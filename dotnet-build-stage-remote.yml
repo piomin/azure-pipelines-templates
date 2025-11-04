@@ -3,6 +3,8 @@ parameters:
     default: 'pminkows'
   - name: moduleName
     default: ''
+  - name: versionPath
+    default: ''
   - name: projectPath
     default: ''
   - name: testProjectPath
@@ -103,12 +105,21 @@ stages:
                 publishTestResults: true
                 testRunTitle: 'Unit Tests'
 
+          - script: |
+              if [ -f "${{ parameters.projectPath }}/Dockerfile" ]; then
+                echo "##vso[task.setvariable variable=hasDockerfile]true"
+              else
+                echo "##vso[task.setvariable variable=hasDockerfile]false"
+              fi
+            displayName: "Check for Dockerfile"
+
           - task: DotNetCoreCLI@2
             displayName: 'Publish locally'
             inputs:
               command: 'publish'
               projects: ${{ parameters.projectPath }}
               arguments: '-c Release --no-restore --output ./publish'
+            condition: eq(variables.hasDockerfile, 'true')
 
 #          - task: SonarQubeAnalyze@7
 #          - task: SonarQubePublish@7
@@ -126,7 +137,7 @@ stages:
 
           - ${{ if eq(parameters.versionMode, 'file') }}:
             - script: |
-                version=$(dotnet msbuild ${{ parameters.projectPath }} -getproperty:Version)
+                version=$(dotnet msbuild ${{ parameters.versionPath }} -getproperty:Version)
                 echo "##vso[task.setvariable variable=appVersion]$version"
                 echo "##vso[task.setvariable variable=imageTag;isOutput=true]$version"
                 echo "App version: $version"

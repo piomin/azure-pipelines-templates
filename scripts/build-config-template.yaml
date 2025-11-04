@@ -1,0 +1,54 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: build-config-template
+  labels:
+    app: build-config-template
+parameters:
+  - name: APP_NAME
+    description: Name of the application
+    required: true
+    value: webapi-app
+  - name: CONTEXT_DIR
+    description: Source directory
+    required: true
+    value: .
+  - name: BUILDER_IMAGE
+    description: S2I Builder image
+    required: true
+    value: dotnet:9.0-ubi8
+  - name: IMAGE_TAG
+    description: Image tag
+    required: true
+    value: "1.0"
+objects:
+  - kind: BuildConfig
+    apiVersion: build.openshift.io/v1
+    metadata:
+      name: ${APP_NAME}
+    spec:
+      output:
+        to:
+          kind: DockerImage
+          name: 'quay.io/pminkows/${APP_NAME}:${IMAGE_TAG}'
+        pushSecret:
+          name: quay-auth
+      successfulBuildsHistoryLimit: 3
+      failedBuildsHistoryLimit: 3
+      strategy:
+        type: Source
+        sourceStrategy:
+          from:
+            kind: ImageStreamTag
+            namespace: openshift
+            name: '${BUILDER_IMAGE}'
+      source:
+        type: Git
+        git:
+          uri: 'https://github.com/piomin/${APP_NAME}.git'
+        contextDir: ${CONTEXT_DIR}
+        secrets:
+          - secret:
+              name: azure-artifacts-secret
+            destinationDir: /opt/app-root/src/
+      runPolicy: Serial
