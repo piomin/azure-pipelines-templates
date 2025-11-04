@@ -68,6 +68,8 @@ stages:
 #            name: SetVersion
 
           - script: |
+              pwd
+              ls -la
               echo "Version:$(appVersion)"
               docker login registry.redhat.io -u $(RedHatUsername) -p $(RedHatPassword) 
               if [ -f "${{ parameters.rootPath }}/Dockerfile" ]; then

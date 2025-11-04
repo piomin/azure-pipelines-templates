@@ -114,17 +114,17 @@ stages:
             displayName: "Check for Dockerfile"
 
           - script: |
-              dotnet publish . -c Release --no-restore --output ./publish
+              dotnet publish ${{ parameters.projectPath }} -c Release --no-restore --output ./publish
             displayName: 'Publish locally'
             condition: eq(variables.hasDockerfile, 'true')
 
-          - task: DotNetCoreCLI@2
-            displayName: 'Publish locally'
-            inputs:
-              command: 'publish'
-              projects: ${{ parameters.projectPath }}
-              arguments: '-c Release --no-restore --output ./publish'
-            condition: eq(variables.hasDockerfile, 'true')
+#          - task: DotNetCoreCLI@2
+#            displayName: 'Publish locally'
+#            inputs:
+#              command: 'publish'
+#              projects: ${{ parameters.projectPath }}
+#              arguments: '-c Release --no-restore --output ./publish'
+#            condition: eq(variables.hasDockerfile, 'true')
 
 #          - task: SonarQubeAnalyze@7
 #          - task: SonarQubePublish@7
