@@ -54,10 +54,6 @@ stages:
               vstsFeed: ${{ parameters.feedName }}
 #              nugetConfigFile: '$(UnAuthNuGetConfig.secureFilePath)'
 
-          - script: |
-              dotnet list package --include-transitive
-            displayName: 'Dependencies list'
-
 #          - task: Checkmarx AST@3
 #            inputs:
 #              CheckmarxService: 'Checkmarx'
@@ -106,6 +102,13 @@ stages:
                 arguments: '-c Release --no-restore'
                 publishTestResults: true
                 testRunTitle: 'Unit Tests'
+
+          - task: DotNetCoreCLI@2
+            displayName: 'Publish locally'
+            inputs:
+              command: 'publish'
+              projects: ${{ parameters.projectPath }}
+              arguments: '-c Release --no-restore --output ./publish'
 
 #          - task: SonarQubeAnalyze@7
 #          - task: SonarQubePublish@7
