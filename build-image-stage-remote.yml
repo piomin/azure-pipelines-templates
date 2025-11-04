@@ -16,7 +16,7 @@ stages:
     jobs:
       - job: Build_And_Publish
         steps:
-          - checkout: appRepo
+#          - checkout: appRepo
           - task: DownloadSecureFile@1
             name: NuGetConfig
             inputs:

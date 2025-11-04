@@ -113,6 +113,11 @@ stages:
               fi
             displayName: "Check for Dockerfile"
 
+          - script: |
+              dotnet publish . -c Release --no-restore --output ./publish
+            displayName: 'Publish locally'
+            condition: eq(variables.hasDockerfile, 'true')
+
           - task: DotNetCoreCLI@2
             displayName: 'Publish locally'
             inputs:
