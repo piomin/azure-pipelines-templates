@@ -26,9 +26,18 @@ stages:
             inputs:
               secureFile: 'cosign.key'
 
-          - download: current
-            artifact: artifacts
-            displayName: "Download Build Output"
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              artifact: artifacts
+              path: '$(Build.SourcesDirectory)'
+              buildType: 'current'
+            continueOnError: true
+            displayName: "Try downloading artifact (ignore if missing)"
+
+#          - download: current
+#            artifact: artifacts
+#            displayName: "Download Build Output"
+#            path: $(Build.SourcesDirectory)
 
           - task: CmdLine@2
             inputs:
