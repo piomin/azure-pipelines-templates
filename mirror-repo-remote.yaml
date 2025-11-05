@@ -90,7 +90,7 @@ stages:
               curl -X PATCH \
                   -H "Content-Type: application/json" \
                   -H "Authorization: Bearer $(System.AccessToken)" \
-                  -d '{"completionOptions": {"deleteSourceBranch": false}, "autoCompleteSetBy": {"id": "663964c3-dd8e-4250-8b16-228895ea7834"}}' \
+                  -d '{"completionOptions": {"deleteSourceBranch": false, mergeStrategy: "rebase"}, "autoCompleteSetBy": {"id": "663964c3-dd8e-4250-8b16-228895ea7834"}}' \
                   "$API_URL"
             env:
               System.AccessToken: $(System.AccessToken)
