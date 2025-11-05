@@ -45,6 +45,7 @@ stages:
               # Create new temporary branch
               BRANCH="temppr"
               git checkout -b $BRANCH
+              git pull
               
               git config user.email "buildagent@azuredevops.com"
               git config user.name "Azure DevOps Pipeline"
