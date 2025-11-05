@@ -15,9 +15,13 @@ stages:
           - checkout: git://${{ parameters.appName }}-config
             persistCredentials: true
             path: ${{ parameters.appName }}-local-config-repo
+            fetchDepth: 0
+            clean: true
 
           - checkout: ${{ parameters.appName }}-config-repo
             path: ${{ parameters.appName }}-remote-config-repo
+            fetchDepth: 0
+            clean: true
 
 #          - script: |
 #              echo "Pulling latest changes from Azure Repos..."
