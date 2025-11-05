@@ -15,9 +15,11 @@ stages:
           - checkout: git://${{ parameters.appName }}-config
             persistCredentials: true
             path: ${{ parameters.appName }}-local-config-repo
+            fetchDepth: 0
 
           - checkout: ${{ parameters.appName }}-config-repo
             path: ${{ parameters.appName }}-remote-config-repo
+            fetchDepth: 0
 
           - script: |
               cd ../${{ parameters.appName }}-remote-config-repo
@@ -40,7 +42,7 @@ stages:
               
               # Create new temporary branch
               BRANCH="temppr"
-              git switch $BRANCH
+              git checkout -b $BRANCH
               git status
               
               git config user.email "buildagent@azuredevops.com"
