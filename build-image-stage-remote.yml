@@ -27,7 +27,7 @@ stages:
               secureFile: 'cosign.key'
 
           - download: current
-            artifact: drop
+            artifact: artifacts
             displayName: "Download Build Output"
 
           - task: CmdLine@2

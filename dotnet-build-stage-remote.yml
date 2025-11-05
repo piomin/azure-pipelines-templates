@@ -3,7 +3,7 @@ parameters:
     default: 'pminkows'
   - name: moduleName
     default: ''
-  - name: versionPath
+  - name: mainModulePath
     default: ''
   - name: projectPath
     default: ''
@@ -113,15 +113,6 @@ stages:
               fi
             displayName: "Check for Dockerfile"
 
-          - script: |
-              dotnet publish ${{ parameters.projectPath }} -c Release --no-restore --output ./publish
-            displayName: 'Publish locally'
-            condition: eq(variables.hasDockerfile, 'true')
-
-          - publish: ./publish
-            artifact: 'drop'
-            displayName: "Publish Artifacts"
-
 #          - task: DotNetCoreCLI@2
 #            displayName: 'Publish locally'
 #            inputs:
@@ -185,3 +176,12 @@ stages:
               inputs:
                 command: 'push'
                 publishVstsFeed: ${{ parameters.feedName }}
+
+          - script: |
+              dotnet publish ${{ parameters.projectPath }} -c Release --no-restore --output ./publish
+            displayName: 'Publish locally'
+            condition: eq(variables.hasDockerfile, 'true')
+          - publish: ./publish
+            artifact: 'artifacts'
+            displayName: "Publish Artifacts"
+            condition: eq(variables.hasDockerfile, 'true')
