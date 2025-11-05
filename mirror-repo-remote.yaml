@@ -3,6 +3,8 @@ parameters:
     default: ''
   - name: projectName
     default: ''
+  - name: branchName
+    default: 'main'
 
 stages:
   - stage: ${{ parameters.appName }}_Sync
@@ -21,7 +23,7 @@ stages:
               echo "Pulling latest changes from Azure Repos..."
               cd ../${{ parameters.appName }}-remote-config-repo
               git fetch origin
-              git reset --hard origin/master
+              git reset --hard origin/${{ parameters.branchName }}
             displayName: "Update Azure Repos repo"
 
           - script: |
@@ -59,7 +61,7 @@ stages:
               PROJECT="${{ parameters.projectName }}"
               REPO="${{ parameters.appName }}-config"
               SOURCE_BRANCH="temppr"
-              TARGET_BRANCH="main"
+              TARGET_BRANCH="${{ parameters.branchName }}"
               TITLE="Sync from GitHub repo"
               DESCRIPTION="Automated PR from GitHub -> Azure Repos"
 
