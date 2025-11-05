@@ -118,6 +118,10 @@ stages:
             displayName: 'Publish locally'
             condition: eq(variables.hasDockerfile, 'true')
 
+          - publish: ./publish
+            artifact: 'drop'
+            displayName: "Publish Artifacts"
+
 #          - task: DotNetCoreCLI@2
 #            displayName: 'Publish locally'
 #            inputs:

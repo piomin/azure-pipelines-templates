@@ -16,7 +16,7 @@ stages:
     jobs:
       - job: Build_And_Publish
         steps:
-#          - checkout: appRepo
+          - checkout: appRepo
           - task: DownloadSecureFile@1
             name: NuGetConfig
             inputs:
@@ -25,6 +25,11 @@ stages:
             name: CosignKey
             inputs:
               secureFile: 'cosign.key'
+
+          - download: current
+            artifact: drop
+            displayName: "Download Build Output"
+
           - task: CmdLine@2
             inputs:
               script: |
