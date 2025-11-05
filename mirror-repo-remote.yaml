@@ -22,6 +22,8 @@ stages:
           - script: |
               echo "Pulling latest changes from Azure Repos..."
               cd ../${{ parameters.appName }}-remote-config-repo
+              git remote -v
+              git branch -r
               git fetch origin
               git reset --hard origin/${{ parameters.branchName }}
             displayName: "Update Azure Repos repo"
