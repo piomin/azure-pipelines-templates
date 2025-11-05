@@ -29,7 +29,7 @@ stages:
           - task: DownloadPipelineArtifact@2
             inputs:
               artifact: artifacts
-              path: '$(Build.SourcesDirectory)'
+              path: '$(Build.SourcesDirectory)/artifacts'
               buildType: 'current'
             continueOnError: true
             displayName: "Try downloading artifact (ignore if missing)"
