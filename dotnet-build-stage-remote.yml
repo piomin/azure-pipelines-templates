@@ -108,10 +108,13 @@ stages:
           - script: |
               if [ -f "${{ parameters.projectPath }}/Dockerfile" ]; then
                 echo "##vso[task.setvariable variable=hasDockerfile]true"
+                echo "##vso[task.setvariable variable=dockerfileExists;isOutput=true]true"
               else
                 echo "##vso[task.setvariable variable=hasDockerfile]false"
+                echo "##vso[task.setvariable variable=dockerfileExists;isOutput=true]false"
               fi
             displayName: "Check for Dockerfile"
+            name: CheckDockerfile
 
 #          - task: DotNetCoreCLI@2
 #            displayName: 'Publish locally'
@@ -181,13 +184,25 @@ stages:
               dotnet publish ${{ parameters.mainModulePath }} -c Release --no-restore --output ./publish
             displayName: 'Publish locally'
             condition: eq(variables.hasDockerfile, 'true')
-          - task: PublishBuildArtifacts@1
-            inputs:
-              PathtoPublish: './publish'
-              ArtifactName: 'artifacts'
-              publishLocation: 'Container'
+
+          - script: |
+              cd ${{ parameters.projectPath }}
+              docker build -t quay.io/pminkows/${{ parameters.appName }}:$(appVersion) .
+              docker images
+            displayName: Build image
             condition: eq(variables.hasDockerfile, 'true')
-#          - publish: ./publish
-#            artifact: 'artifacts'
-#            displayName: "Publish Artifacts"
+
+          - script: |
+              echo "Version:$(appVersion)"
+              docker images
+              docker login quay.io -u pminkows -p $(RedHatPassword)
+              docker push quay.io/pminkows/${{ parameters.appName }}:$(appVersion)
+            displayName: Push Image
+            condition: eq(variables.hasDockerfile, 'true')
+
+#          - task: PublishBuildArtifacts@1
+#            inputs:
+#              PathtoPublish: './publish'
+#              ArtifactName: 'artifacts'
+#              publishLocation: 'Container'
 #            condition: eq(variables.hasDockerfile, 'true')
