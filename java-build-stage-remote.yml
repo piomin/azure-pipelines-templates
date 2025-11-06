@@ -46,7 +46,7 @@ stages:
           - ${{ if eq(parameters.skipChecks, false) }}:
             - task: SonarQubePrepare@7
               inputs:
-                SonarQube: ${{ parameters.sonarProjectKey }}
+                SonarQube: SonarCloud
                 scannerMode: 'cli'
                 projectKey: ${{ parameters.sonarProjectKey }}
                 displayName: Analysis Preparation
