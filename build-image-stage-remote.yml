@@ -70,13 +70,6 @@ stages:
               sudo apt-get update
               sudo apt-get install -y curl
             displayName: "Install curl"
-#          - powershell: |
-#              $version = dotnet msbuild ${{ parameters.projectPath }} -getproperty:Version
-#              Write-Host "##vso[task.setvariable variable=appVersion]$version"
-#              Write-Host "##vso[task.setvariable variable=imageTag;isOutput=true]$version"
-#              Write-Host "App version: $version"
-#            displayName: Get Project Version
-#            name: SetVersion
 
           - script: |
               echo "Version:$(appVersion)"
@@ -95,6 +88,7 @@ stages:
             condition: eq(variables.hasDockerfile, 'false')
 
           - script: |
+              docker login quay.io -u pminkows -p $(RedHatPassword)
               cosign sign --yes --key $(CosignKey.secureFilePath) quay.io/pminkows/${{ parameters.appName }}:$(appVersion)
             displayName: Sign Image
             env:
