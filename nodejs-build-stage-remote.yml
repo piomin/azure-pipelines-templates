@@ -1,6 +1,4 @@
 parameters:
-  - name: feedName
-    default: 'pminkows'
   - name: moduleName
     default: ''
   - name: projectPath
@@ -51,7 +49,7 @@ stages:
               npm ci --omit=dev
             displayName: Install dependencies
 
-          - ${{ if eq(parameters.publish, true) }}:
+          - ${{ if eq(parameters.build, true) }}:
             - script: |
                 cd ${{ parameters.projectPath }}
                 npm run build
