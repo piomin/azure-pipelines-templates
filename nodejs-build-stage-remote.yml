@@ -4,13 +4,13 @@ parameters:
   - name: moduleName
     default: ''
   - name: projectPath
-    default: ''
-  - name: testProjectPath
-    default: ''
+    default: '.'
   - name: sonarProjectKey
     default: ''
   - name: nodejsVersion
     default: '18.x'
+  - name: build
+    default: true
   - name: publish
     default: false
   - name: skipTests
@@ -29,50 +29,45 @@ stages:
             persistCredentials: true
             fetchDepth: 0
 
-#          - task: DownloadSecureFile@1
-#            name: npmrc
-#            inputs:
-#              secureFile: 'npmrc'
+          - task: DownloadSecureFile@1
+            name: npmrc
+            inputs:
+              secureFile: 'npmrc'
 
           - task: NodeTool@0
             inputs:
               versionSpec: ${{ parameters.nodejsVersion }}
             displayName: Use Node.js ${{ parameters.nodejsVersion }}
 
-#          - script: |
-#              touch $(Pipeline.Workspace)/.npmrc.temp
-#            displayName: 'Generate temporary .npmrc'
-#
-#          - script: |
-#              cat $(npmrc.secureFilePath)
-#              cat $(Pipeline.Workspace)/.npmrc.temp
-#            displayName: Test
-
-          - task: npmAuthenticate@0
-#            inputs:
-#              workingFile: .npmrc
-            displayName: Authenticate Feed
+          - script: |
+              echo "Copying secure .npmrc to home directory"
+              mkdir -p $HOME
+              cp $(npmrc.secureFilePath) $HOME/.npmrc
+            displayName: "Set up global .npmrc"
 
           # Install dependencies (production-only by default)
           - script: |
+              cd ${{ parameters.projectPath }}
               npm ci --omit=dev
             displayName: Install dependencies
 
-          # Run build (if you have a build step)
-#          - script: |
-#              echo "Building the app..."
-#              npm run build
-#            displayName: 'Build'
+          - ${{ if eq(parameters.publish, true) }}:
+            - script: |
+                cd ${{ parameters.projectPath }}
+                npm run build
+              displayName: 'Build'
 
           # Run tests
           - ${{ if eq(parameters.skipTests, false) }}:
             - script: |
+                cd ${{ parameters.projectPath }}
                 echo "Running tests..."
                 npm test
               displayName: 'Test'
 
           - ${{ if eq(parameters.versionMode, 'file') }}:
             - script: |
+                cd ${{ parameters.projectPath }}
                 version=$(npm pkg get version | tr -d '"')
                 echo "##vso[task.setvariable variable=appVersion]$version"
                 echo "##vso[task.setvariable variable=imageTag;isOutput=true]$version"
@@ -119,15 +114,17 @@ stages:
             displayName: Publish SonarQube Results
             condition: always()
 
-          - ${{ if eq(parameters.publish, true) }}:
-            - task: DotNetCoreCLI@2
-              displayName: 'Pack package'
-              inputs:
-                command: 'pack'
-                packagesToPack: ${{ parameters.projectPath }}
-                arguments: '-c Release'
-            - task: DotNetCoreCLI@2
-              displayName: 'Publish package to Azure Artifacts'
-              inputs:
-                command: 'push'
-                publishVstsFeed: ${{ parameters.feedName }}
+          - script: |
+              if [ -f "${{ parameters.projectPath }}/Dockerfile" ]; then
+                echo "##vso[task.setvariable variable=hasDockerfile]true"
+              else
+                echo "##vso[task.setvariable variable=hasDockerfile]false"
+              fi
+            displayName: "Check for Dockerfile"
+
+          - task: PublishBuildArtifacts@1
+            inputs:
+              PathtoPublish: '${{ parameters.projectPath }}'
+              ArtifactName: 'artifacts'
+              publishLocation: 'Container'
+            condition: eq(variables.hasDockerfile, 'true')
