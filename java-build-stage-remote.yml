@@ -5,6 +5,8 @@ parameters:
     default: ''
   - name: feedName
     default: ''
+  - name: projectPath
+    default: '.'
   - name: sonarProjectKey
     default: ''
   - name: jdkVersion
@@ -12,6 +14,8 @@ parameters:
   - name: versionMode
     default: 'file'
   - name: skipChecks
+    default: false
+  - name: publish
     default: false
 
 stages:
@@ -49,7 +53,7 @@ stages:
 
           - task: Maven@4
             inputs:
-              mavenPomFile: 'pom.xml'
+              mavenPomFile: '${{ parameters.projectPath }}/pom.xml'
               goals: 'clean package'
               publishJUnitResults: true
               testResultsFiles: '**/surefire-reports/TEST-*.xml'
@@ -60,12 +64,6 @@ stages:
               effectivePomSkip: false
               sonarQubeRunAnalysis: ${{ not(parameters.skipChecks) }}
             displayName: Maven Build
-
-          - task: Maven@4
-            inputs:
-              mavenPomFile: 'pom.xml'
-              goals: 'dependency:tree'
-            displayName: Dependencies
 
           - ${{ if eq(parameters.skipChecks, false) }}:
             - task: SonarQubePublish@7
@@ -102,3 +100,46 @@ stages:
                displayName: Create Git Tag
                name: SetVersion
 
+          - script: |
+              if [ -f "${{ parameters.projectPath }}/Dockerfile" ]; then
+                echo "##vso[task.setvariable variable=hasDockerfile]true"
+                echo "##vso[task.setvariable variable=dockerfileExists;isOutput=true]true"
+              else
+                echo "##vso[task.setvariable variable=hasDockerfile]false"
+                echo "##vso[task.setvariable variable=dockerfileExists;isOutput=true]false"
+              fi
+            displayName: "Check for Dockerfile"
+            name: CheckDockerfile
+
+          - script: |
+              cd ${{ parameters.projectPath }}
+              docker build -t quay.io/pminkows/${{ parameters.appName }}:$(appVersion) .
+              docker images
+            displayName: Build image
+            condition: eq(variables.hasDockerfile, 'true')
+
+          - script: |
+              echo "Version:$(appVersion)"
+              docker images
+              docker login quay.io -u pminkows -p $(RedHatPassword)
+              docker push quay.io/pminkows/${{ parameters.appName }}:$(appVersion)
+            displayName: Push Image
+            condition: eq(variables.hasDockerfile, 'true')
+
+          - ${{ if eq(parameters.publish, true) }}:
+            - task: Maven@4
+              inputs:
+                mavenPomFile: '${{ parameters.projectPath }}/pom.xml'
+                goals: 'dependency:tree'
+              displayName: Dependencies
+            - task: Maven@4
+              inputs:
+                mavenPomFile: '${{ parameters.projectPath }}/pom.xml'
+                goals: 'dependency:copy-dependencies'
+                options: '-DoutputDirectory=$(Build.ArtifactStagingDirectory)/publish'
+              displayName: Dependencies export
+            - task: PublishBuildArtifacts@1
+              inputs:
+                pathToPublish: '$(Build.ArtifactStagingDirectory)/publish'
+                artifactName: 'dependencies'
+              displayName: Publish Maven dependencies
