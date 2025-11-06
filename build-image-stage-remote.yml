@@ -92,6 +92,7 @@ stages:
               docker login quay.io -u pminkows -p $(RedHatPassword)
               docker push quay.io/pminkows/${{ parameters.appName }}:$(appVersion)
             displayName: Push Image
+            condition: eq(variables.hasDockerfile, 'false')
 
           - script: |
               cosign sign --yes --key $(CosignKey.secureFilePath) quay.io/pminkows/${{ parameters.appName }}:$(appVersion)
