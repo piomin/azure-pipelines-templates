@@ -36,9 +36,9 @@ stages:
             inputs:
               secureFile: 'npmrc'
 
-          - task: NodeTool@0
+          - task: UseNode@1
             inputs:
-              versionSpec: ${{ parameters.nodejsVersion }}
+              version: ${{ parameters.nodejsVersion }}
             displayName: Use Node.js ${{ parameters.nodejsVersion }}
 
           - script: |
