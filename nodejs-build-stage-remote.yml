@@ -127,10 +127,13 @@ stages:
           - script: |
               if [ -f "${{ parameters.projectPath }}/Dockerfile" ]; then
                 echo "##vso[task.setvariable variable=hasDockerfile]true"
+                echo "##vso[task.setvariable variable=dockerfileExists;isOutput=true]true"
               else
                 echo "##vso[task.setvariable variable=hasDockerfile]false"
+                echo "##vso[task.setvariable variable=dockerfileExists;isOutput=true]false"
               fi
             displayName: "Check for Dockerfile"
+            name: CheckDockerfile
 
           - script: |
               cd ${{ parameters.projectPath }}
