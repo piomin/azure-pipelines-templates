@@ -132,7 +132,6 @@ stages:
 
           - script: |
               cd ${{ parameters.projectPath }}
-#              docker login registry.redhat.io -u $(RedHatUsername) -p $(RedHatPassword)
               docker build -t quay.io/pminkows/${{ parameters.appName }}:$(appVersion)
               docker images
             displayName: Build image
