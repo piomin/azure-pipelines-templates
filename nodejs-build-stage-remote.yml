@@ -134,7 +134,7 @@ stages:
 
           - script: |
               cd ${{ parameters.projectPath }}
-              docker build -t quay.io/pminkows/${{ parameters.appName }}:$(appVersion)
+              docker build -t quay.io/pminkows/${{ parameters.appName }}:$(appVersion) .
               docker images
             displayName: Build image
             condition: eq(variables.hasDockerfile, 'true')
