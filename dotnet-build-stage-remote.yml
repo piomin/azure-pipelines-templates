@@ -3,6 +3,8 @@ parameters:
     default: 'pminkows'
   - name: moduleName
     default: ''
+  - name: appName
+    default: ''
   - name: mainModulePath
     default: ''
   - name: projectPath
@@ -105,17 +107,6 @@ stages:
                 publishTestResults: true
                 testRunTitle: 'Unit Tests'
 
-          - script: |
-              if [ -f "${{ parameters.projectPath }}/Dockerfile" ]; then
-                echo "##vso[task.setvariable variable=hasDockerfile]true"
-                echo "##vso[task.setvariable variable=dockerfileExists;isOutput=true]true"
-              else
-                echo "##vso[task.setvariable variable=hasDockerfile]false"
-                echo "##vso[task.setvariable variable=dockerfileExists;isOutput=true]false"
-              fi
-            displayName: "Check for Dockerfile"
-            name: CheckDockerfile
-
 #          - task: DotNetCoreCLI@2
 #            displayName: 'Publish locally'
 #            inputs:
@@ -181,13 +172,24 @@ stages:
                 publishVstsFeed: ${{ parameters.feedName }}
 
           - script: |
+              if [ -f "${{ parameters.projectPath }}/Dockerfile" ]; then
+                echo "##vso[task.setvariable variable=hasDockerfile]true"
+                echo "##vso[task.setvariable variable=dockerfileExists;isOutput=true]true"
+              else
+                echo "##vso[task.setvariable variable=hasDockerfile]false"
+                echo "##vso[task.setvariable variable=dockerfileExists;isOutput=true]false"
+              fi
+            displayName: "Check for Dockerfile"
+            name: CheckDockerfile
+
+          - script: |
               dotnet publish ${{ parameters.mainModulePath }} -c Release --no-restore --output ./publish
             displayName: 'Publish locally'
             condition: eq(variables.hasDockerfile, 'true')
 
           - script: |
               cd ${{ parameters.projectPath }}
-              docker build -t quay.io/pminkows/${{ parameters.moduleName }}:$(appVersion) .
+              docker build -t quay.io/pminkows/${{ parameters.appName }}:$(appVersion) .
               docker images
             displayName: Build image
             condition: eq(variables.hasDockerfile, 'true')
@@ -196,7 +198,7 @@ stages:
               echo "Version:$(appVersion)"
               docker images
               docker login quay.io -u pminkows -p $(RedHatPassword)
-              docker push quay.io/pminkows/${{ parameters.moduleName }}:$(appVersion)
+              docker push quay.io/pminkows/${{ parameters.appName }}:$(appVersion)
             displayName: Push Image
             condition: eq(variables.hasDockerfile, 'true')
 
