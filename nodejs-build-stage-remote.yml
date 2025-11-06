@@ -142,6 +142,14 @@ stages:
             displayName: Build image
             condition: eq(variables.hasDockerfile, 'true')
 
+          - script: |
+              echo "Version:$(appVersion)"
+              docker images
+              docker login quay.io -u pminkows -p $(RedHatPassword)
+              docker push quay.io/pminkows/${{ parameters.appName }}:$(appVersion)
+            displayName: Push Image
+            condition: eq(variables.hasDockerfile, 'true')
+
 #          - task: PublishBuildArtifacts@1
 #            inputs:
 #              PathtoPublish: '${{ parameters.projectPath }}'

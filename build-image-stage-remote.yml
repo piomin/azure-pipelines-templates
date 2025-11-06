@@ -88,6 +88,7 @@ stages:
 
           - script: |
               echo "Version:$(appVersion)"
+              docker images
               docker login quay.io -u pminkows -p $(RedHatPassword)
               docker push quay.io/pminkows/${{ parameters.appName }}:$(appVersion)
             displayName: Push Image
