@@ -49,8 +49,8 @@ stages:
 #            displayName: Test
 
           - task: npmAuthenticate@0
-            inputs:
-              workingFile: .npmrc
+#            inputs:
+#              workingFile: .npmrc
             displayName: Authenticate Feed
 
           # Install dependencies (production-only by default)
