@@ -29,24 +29,24 @@ stages:
             persistCredentials: true
             fetchDepth: 0
 
-          - task: DownloadSecureFile@1
-            name: npmrc
-            inputs:
-              secureFile: 'npmrc'
+#          - task: DownloadSecureFile@1
+#            name: npmrc
+#            inputs:
+#              secureFile: 'npmrc'
 
           - task: NodeTool@0
             inputs:
               versionSpec: ${{ parameters.nodejsVersion }}
             displayName: Use Node.js ${{ parameters.nodejsVersion }}
 
-          - script: |
-              touch $(Pipeline.Workspace)/.npmrc.temp
-            displayName: 'Generate temporary .npmrc'
-
-          - script: |
-              cat $(npmrc.secureFilePath)
-              cat $(Pipeline.Workspace)/.npmrc.temp
-            displayName: Test
+#          - script: |
+#              touch $(Pipeline.Workspace)/.npmrc.temp
+#            displayName: 'Generate temporary .npmrc'
+#
+#          - script: |
+#              cat $(npmrc.secureFilePath)
+#              cat $(Pipeline.Workspace)/.npmrc.temp
+#            displayName: Test
 
           - task: npmAuthenticate@0
             inputs:
