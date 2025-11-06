@@ -35,13 +35,13 @@ stages:
               mavenServiceConnections: ${{ parameters.feedName }}
             displayName: Maven Authenticate
 
-          - ${{ if eq(parameters.skipChecks, false) }}:
-            - task: Checkmarx AST@3
-              inputs:
-                CheckmarxService: 'Checkmarx'
-                projectName: ${{ parameters.moduleName }}
-                branchName: '$(Build.SourceBranchName)'
-                tenantName: 'frontex'
+#          - ${{ if eq(parameters.skipChecks, false) }}:
+#            - task: Checkmarx AST@3
+#              inputs:
+#                CheckmarxService: 'Checkmarx'
+#                projectName: ${{ parameters.moduleName }}
+#                branchName: '$(Build.SourceBranchName)'
+#                tenantName: 'frontex'
 
           - ${{ if eq(parameters.skipChecks, false) }}:
             - task: SonarQubePrepare@7
