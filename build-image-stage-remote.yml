@@ -79,8 +79,6 @@ stages:
 #            name: SetVersion
 
           - script: |
-              pwd
-              ls -la
               echo "Version:$(appVersion)"
               docker login registry.redhat.io -u $(RedHatUsername) -p $(RedHatPassword) 
               s2i build . ${{ parameters.builderImage }} quay.io/pminkows/${{ parameters.appName }}:$(appVersion) --volume $(NuGetConfig.secureFilePath):/opt/app-root/src/nuget.config:Z --context-dir ${{ parameters.rootPath }}
@@ -89,6 +87,7 @@ stages:
             condition: eq(variables.hasDockerfile, 'false')
 
           - script: |
+              echo "Version:$(appVersion)"
               docker login quay.io -u pminkows -p $(RedHatPassword)
               docker push quay.io/pminkows/${{ parameters.appName }}:$(appVersion)
             displayName: Push Image
