@@ -1,6 +1,8 @@
 parameters:
   - name: moduleName
     default: ''
+  - name: appName
+    default: ''
   - name: projectPath
     default: '.'
   - name: sonarProjectKey
@@ -42,6 +44,14 @@ stages:
               mkdir -p $HOME
               cp $(npmrc.secureFilePath) $HOME/.npmrc
             displayName: "Set up global .npmrc"
+
+          - ${{ if eq(parameters.skipChecks, false) }}:
+              - task: Checkmarx AST@3
+                inputs:
+                  CheckmarxService: 'Checkmarx'
+                  projectName: ${{ parameters.moduleName }}
+                  branchName: '$(Build.SourceBranchName)'
+                  tenantName: 'frontex'
 
           # Install dependencies (production-only by default)
           - script: |
@@ -93,24 +103,24 @@ stages:
                 displayName: Create Git Tag
                 name: SetVersion
 
-          - task: SonarCloudPrepare@3
-            inputs:
-              SonarQube: SonarCloud
-              scannerMode: 'cli'
-              configMode: 'manual'
-              organization: 'piomin'
-              cliProjectKey: ${{ parameters.sonarProjectKey }}
-              displayName: Analysis Preparation
-              extraProperties: |
-                sonar.verbose=true
-#                sonar.projectBaseDir=$(Build.SourcesDirectory)/src/${{ parameters.moduleName }}
-
-          - task: SonarCloudAnalyze@3
-          - task: SonarCloudPublish@3
-            inputs:
-              pollingTimeoutSec: '300'
-            displayName: Publish SonarQube Results
-            condition: always()
+          - ${{ if eq(parameters.skipChecks, false) }}:
+            - task: SonarCloudPrepare@3
+              inputs:
+                SonarQube: SonarCloud
+                scannerMode: 'cli'
+                configMode: 'manual'
+                organization: 'piomin'
+                cliProjectKey: ${{ parameters.sonarProjectKey }}
+                displayName: Analysis Preparation
+                extraProperties: |
+                  sonar.verbose=true
+  #                sonar.projectBaseDir=$(Build.SourcesDirectory)/src/${{ parameters.moduleName }}
+            - task: SonarCloudAnalyze@3
+            - task: SonarCloudPublish@3
+              inputs:
+                pollingTimeoutSec: '300'
+              displayName: Publish SonarQube Results
+              condition: always()
 
           - script: |
               if [ -f "${{ parameters.projectPath }}/Dockerfile" ]; then
@@ -120,9 +130,17 @@ stages:
               fi
             displayName: "Check for Dockerfile"
 
-          - task: PublishBuildArtifacts@1
-            inputs:
-              PathtoPublish: '${{ parameters.projectPath }}'
-              ArtifactName: 'artifacts'
-              publishLocation: 'Container'
+          - script: |
+              cd ${{ parameters.projectPath }}
+#              docker login registry.redhat.io -u $(RedHatUsername) -p $(RedHatPassword)
+              docker build -t quay.io/pminkows/${{ parameters.appName }}:$(appVersion)
+              docker images
+            displayName: Build image
             condition: eq(variables.hasDockerfile, 'true')
+
+#          - task: PublishBuildArtifacts@1
+#            inputs:
+#              PathtoPublish: '${{ parameters.projectPath }}'
+#              ArtifactName: 'artifacts'
+#              publishLocation: 'Container'
+#            condition: eq(variables.hasDockerfile, 'true')
