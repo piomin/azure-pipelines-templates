@@ -44,12 +44,16 @@ stages:
 #                tenantName: 'frontex'
 
           - ${{ if eq(parameters.skipChecks, false) }}:
-            - task: SonarQubePrepare@7
+            - task: SonarCloudPrepare@3
               inputs:
                 SonarQube: SonarCloud
                 scannerMode: 'cli'
-                projectKey: ${{ parameters.sonarProjectKey }}
+                configMode: 'manual'
+                organization: 'piomin'
+                cliProjectKey: ${{ parameters.sonarProjectKey }}
                 displayName: Analysis Preparation
+                extraProperties: |
+                  sonar.verbose=true
 
           - task: Maven@4
             inputs:
@@ -66,10 +70,11 @@ stages:
             displayName: Maven Build
 
           - ${{ if eq(parameters.skipChecks, false) }}:
-            - task: SonarQubePublish@7
+            - task: SonarCloudPublish@3
               inputs:
                 pollingTimeoutSec: '300'
               displayName: Publish SonarQube Results
+              condition: always()
 
           - ${{ if eq(parameters.versionMode, 'file') }}:
              - script: |
