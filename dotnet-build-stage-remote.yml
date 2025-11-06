@@ -187,7 +187,7 @@ stages:
 
           - script: |
               cd ${{ parameters.projectPath }}
-              docker build -t quay.io/pminkows/${{ parameters.appName }}:$(appVersion) .
+              docker build -t quay.io/pminkows/${{ parameters.moduleName }}:$(appVersion) .
               docker images
             displayName: Build image
             condition: eq(variables.hasDockerfile, 'true')
@@ -196,7 +196,7 @@ stages:
               echo "Version:$(appVersion)"
               docker images
               docker login quay.io -u pminkows -p $(RedHatPassword)
-              docker push quay.io/pminkows/${{ parameters.appName }}:$(appVersion)
+              docker push quay.io/pminkows/${{ parameters.moduleName }}:$(appVersion)
             displayName: Push Image
             condition: eq(variables.hasDockerfile, 'true')
 
