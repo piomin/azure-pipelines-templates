@@ -29,12 +29,6 @@ stages:
             persistCredentials: true
             fetchDepth: 0
 
-          - task: MavenAuthenticate@0
-            inputs:
-              artifactsFeeds: ${{ parameters.feedName }}
-              mavenServiceConnections: ${{ parameters.feedName }}
-            displayName: Maven Authenticate
-
 #          - ${{ if eq(parameters.skipChecks, false) }}:
 #            - task: Checkmarx AST@3
 #              inputs:
@@ -55,6 +49,10 @@ stages:
                 extraProperties: |
                   sonar.verbose=true
 
+          - task: MavenAuthenticate@0
+            inputs:
+              artifactsFeeds: ${{ parameters.feedName }}
+            displayName: Maven Authenticate
           - task: Maven@4
             inputs:
               mavenPomFile: '${{ parameters.projectPath }}/pom.xml'
