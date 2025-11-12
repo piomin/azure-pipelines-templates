@@ -53,15 +53,6 @@ stages:
             inputs:
               artifactsFeeds: ${{ parameters.feedName }}
             displayName: Maven Authenticate
-          - script: |
-              sed -i '/<mirrors>/a \
-              <mirror>\
-              <id>pmikows</id>\
-              <mirrorOf>*</mirrorOf>\
-              <url>https://pkgs.dev.azure.com/pminkows/_packaging/pminkows/maven/v1</url>\
-              </mirror>' ~/.m2/settings.xml
-              cat ~/.m2/settings.xml
-            displayName: 'Inject Maven mirror'
           - task: Maven@4
             inputs:
               mavenPomFile: '${{ parameters.projectPath }}/pom.xml'
