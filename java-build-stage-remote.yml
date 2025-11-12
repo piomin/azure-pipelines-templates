@@ -56,11 +56,13 @@ stages:
           - script: |
               echo "Injecting mirror for Azure Artifacts..."
               sed -i 's|<mirrors>|<mirrors><mirror><id>azure</id><mirrorOf>*</mirrorOf><url>https://pkgs.dev.azure.com/pminkows/_packaging/pminkows/maven/v1</url></mirror>|' ~/.m2/settings.xml
+              cat ~/.m2/settings.xml
             displayName: 'Inject Maven mirror'
           - task: Maven@4
             inputs:
               mavenPomFile: '${{ parameters.projectPath }}/pom.xml'
               goals: 'clean package'
+              options: '-s ~/.m2/settings.xml'
               publishJUnitResults: true
               testResultsFiles: '**/surefire-reports/TEST-*.xml'
               javaHomeOption: 'JDKVersion'
