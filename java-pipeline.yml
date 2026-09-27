@@ -18,12 +18,16 @@ jobs:
           artifactsFeeds: ${{ parameters.feedName }}
           mavenServiceConnections: ${{ parameters.feedName }}
         displayName: Maven Authenticate
-      - task: SonarQubePrepare@7
+      - task: SonarCloudPrepare@3
         inputs:
-          SonarQube: ${{ parameters.sonarName }}
+          SonarQube: SonarCloud
           scannerMode: 'cli'
+          organization: 'piomin'
           projectKey: ${{ parameters.appName }}
           displayName: Analysis Preparation
+          extraProperties: |
+            sonar.qualitygate.wait=true
+            sonar.scanner.scanOverDays=30
       - task: Maven@4
         inputs:
           mavenPomFile: 'pom.xml'
@@ -37,10 +41,14 @@ jobs:
           effectivePomSkip: false
           sonarQubeRunAnalysis: true
         displayName: Maven Build
-      - task: SonarQubePublish@7
+      - task: SonarCloudAnalyze@3
+        inputs:
+          timeoutSec: '300'
+      - task: SonarCloudPublish@3
         inputs:
           pollingTimeoutSec: '300'
         displayName: Publish SonarQube Results
+        condition: always()
       - task: CmdLine@2
         inputs:
           script: |

@@ -116,8 +116,12 @@ stages:
                 displayName: Analysis Preparation
                 extraProperties: |
                   sonar.verbose=true
-  #                sonar.projectBaseDir=$(Build.SourcesDirectory)/src/${{ parameters.moduleName }}
+                  sonar.projectBaseDir=$(Build.SourcesDirectory)/src/${{ parameters.moduleName }}
+                  sonar.qualitygate.wait=true
+                  sonar.scanner.scanOverDays=30
             - task: SonarCloudAnalyze@3
+              inputs:
+                timeoutSec: '300'
             - task: SonarCloudPublish@3
               inputs:
                 pollingTimeoutSec: '300'
