@@ -7,7 +7,6 @@ stages:
     dependsOn: Build
     condition: succeeded()
     variables:
-      imageTag: '$(appVersion)'
       appVersion: $[ stageDependencies.Build.Build.outputs['SetVersion.appVersion'] ]
     jobs:
       - job: BuildOnOpenShift

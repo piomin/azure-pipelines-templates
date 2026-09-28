@@ -76,12 +76,11 @@ stages:
 
           - ${{ if eq(parameters.versionMode, 'file') }}:
              - script: |
-                 version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-                 echo "##vso[task.setvariable variable=appVersion]$version"
-                 echo "##vso[task.setvariable variable=imageTag;isOutput=true]$version"
-                 echo "App version: $version"
-               displayName: Get App Version
-               name: SetVersion
+                  version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+                  echo "##vso[task.setvariable variable=appVersion]$version"
+                  echo "App version: $version"
+                displayName: Get App Version
+                name: SetVersion
 
           - ${{ if eq(parameters.versionMode, 'tag') }}:
              - task: gitversion-setup@4
@@ -94,10 +93,9 @@ stages:
              - script: |
                  git config user.email "buildagent@yourcompany.com"
                  git config user.name "Azure Pipelines"
-                 version=$(GetVersion.MajorMinorPatch)
-                 echo "##vso[task.setvariable variable=appVersion]$version"
-                 echo "##vso[task.setvariable variable=imageTag;isOutput=true]$version"
-                 echo "App version: $version"
+                  version=$(GetVersion.MajorMinorPatch)
+                  echo "##vso[task.setvariable variable=appVersion]$version"
+                  echo "App version: $version"
                  git tag $version
                  git push origin $version
                displayName: Create Git Tag
