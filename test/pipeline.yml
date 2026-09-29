@@ -1,0 +1,40 @@
+trigger:
+  - master
+
+pool:
+  name: Azure Pipelines
+
+stages:
+  - stage: Build
+    displayName: 'Build Application'
+    jobs:
+      - job: BuildApp
+        steps:
+          - task: Checkout@1
+            displayName: Checkout
+            inputs:
+              repo: 'piomin/azure-pipelines-templates'
+              persistCredentials: true
+
+          - template: /java-build-stage-remote.yml
+            parameters:
+              appName: sample-spring-kotlin-microservice
+              moduleName: sample-spring-kotlin-microservice
+              feedName: pminkows
+              projectPath: .
+              sonarProjectKey: piomin_sample-spring-kotlin-microservice
+              jdkVersion: '1.21'
+              versionMode: file
+              skipChecks: false
+              publish: false
+
+  - stage: S2IBuild
+    displayName: 'S2I Build on OpenShift'
+    dependsOn: Build
+    condition: succeeded()
+    jobs:
+      - job: BuildImage
+        steps:
+          - template: /s2i-build-image-stage.yml
+            parameters:
+              appName: sample-spring-kotlin-microservice
